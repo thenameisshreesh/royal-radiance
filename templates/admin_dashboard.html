@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+
+<!-- 🔥 Background Video or GIF -->
+<div class="bg-flame">
+  <!-- use MP4 or GIF file from static/videos folder -->
+  <video autoplay muted loop playsinline>
+    <source src="{{ url_for('static', filename='images/cg.mp4') }}" type="video/mp4">
+  </video>
+</div>
+
+<section class="wrap admin-dash">
+  <h2>Admin Dashboard</h2>
+  <div class="admin-cards">
+    <div class="card small">
+      <span>Products</span>
+      <strong>{{ products }}</strong>
+      <a href="{{ url_for('admin_products') }}" class="btn">Manage</a>
+    </div>
+
+    <div class="card small">
+      <span>Blogs</span>
+      <strong>{{ blogs }}</strong>
+      <a href="{{ url_for('admin_blogs') }}" class="btn">Manage</a>
+    </div>
+
+    <div class="card small">
+  <span>Edit About</span>
+  <strong>&nbsp;</strong> <!-- empty strong for spacing like other cards -->
+  <a href="{{ url_for('admin_edit', key='about') }}" class="btn">Edit</a>
+</div>
+
+<div class="card small">
+  <span>Special Offer</span>
+  <strong>&nbsp;</strong> <!-- empty strong for spacing -->
+  <a href="{{ url_for('admin_edit', key='special_offer') }}" class="btn">Edit</a>
+</div>
+
+
+    <div class="logout-btn">
+      <a class="btn ghost" href="{{ url_for('admin_logout') }}">Logout</a>
+    </div>
+
+
+  </div>
+</section>
+
+<style>
+/* --- Background Video --- */
+/* Background Video */
+.bg-flame {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 900px;          /* increase width to prevent cropping */
+  max-width: 90vw;       /* responsive max width */
+  height: auto;          /* adjust height automatically */
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.15;
+}
+
+.bg-flame video,
+.bg-flame img {
+  display: block;
+  width: 100%;
+  height: auto;          /* maintain aspect ratio */
+  object-fit: contain;   /* prevents distortion */
+}
+
+
+header, main, footer, .wrap, .site-header, .site-footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* --- Admin Dashboard Styles --- */
+body {
+  background: linear-gradient(180deg, #0a0a0a, #1a1a1a);
+  color: white;
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2.2rem;
+  letter-spacing: 1px;
+  color: #fff;
+  text-shadow: 0 0 12px #ffee91;
+}
+
+.admin-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1.5rem;
+  justify-items: center;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 14px;
+  padding: 1.5rem;
+  text-align: center;
+  color: white;
+  width: 100%;
+  max-width: 280px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card:hover {
+  transform: scale(1.05) translateY(-5px);
+  box-shadow:
+      0 0 5px #fff68e,
+      0 0 10px #fff68e,
+      0 0 20px #fff68e,
+      0 0 30px #fff68e;
+  z-index: 2;
+}
+
+.card strong {
+  display: block;
+  font-size: 1.8rem;
+  margin: 0.8rem 0;
+  color: #ffee91;
+}
+
+.card a.btn {
+  background: transparent;
+  border: 1px solid #fff68e;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.card a.btn:hover {
+  box-shadow:
+      0 0 5px #fff68e,
+      0 0 10px #fff68e,
+      0 0 20px #fff68e,
+      0 0 30px #fff68e;
+  transform: scale(1.08) translateY(-3px);
+  z-index: 2;
+}
+
+/* Logout Button */
+.btn.ghost {
+  border: 1px solid #fff68e;
+  color: #ffee91;
+  background: transparent;
+  padding: 0.7rem 1.2rem;
+  border-radius: 12px;
+  display: inline-block;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.btn.ghost:hover {
+  box-shadow:
+      0 0 5px #fff68e,
+      0 0 10px #fff68e,
+      0 0 20px #fff68e,
+      0 0 30px #fff68e;
+  transform: scale(1.08) translateY(-3px);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .admin-cards { grid-template-columns: 1fr 1fr; }
+  .card { padding: 1rem; font-size: 0.9rem; }
+  h2 { font-size: 1.6rem; }
+}
+
+
+/* Logout Button Full-Width Centering */
+.admin-cards > div.logout-btn {
+  grid-column: 1 / -1; /* span all columns in grid */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.card strong {
+  display: block;
+  font-size: 1.8rem;
+  margin: 0.8rem 0;
+  color: #ffee91;
+  min-height: 2rem; /* ensures spacing even if empty */
+}
+
+.card a.btn {
+  margin-top: 0.5rem; /* consistent spacing from strong */
+}
+
+
+</style>
+
+{% endblock %}

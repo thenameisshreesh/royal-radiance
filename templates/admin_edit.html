@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Edit Content{% endblock %}
+{% block content %}
+<section class="wrap admin-edit">
+  <h2>📝 Edit "{{ item.key }}"</h2>
+  <form method="post" class="edit-form">
+    <textarea name="value" rows="10">{{ item.value }}</textarea>
+    <div><button class="btn glow" type="submit">Save</button></div>
+  </form>
+</section>
+
+<style>
+body { background: #000; color: #fff; font-family: "Poppins", sans-serif; margin: 0; }
+h2 { text-align: center; color: #FFD700; text-shadow: 0 0 10px #FFD700; }
+
+.edit-form {
+  width: 90%;
+  max-width: 700px;
+  margin: 2rem auto;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 0 15px rgba(255,215,0,0.2);
+}
+
+textarea {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid #FFD700;
+  background: #111;
+  color: #fff;
+  font-size: 1rem;
+  resize: vertical;
+  outline: none;
+  transition: box-shadow 0.3s ease;
+}
+
+textarea:focus { box-shadow: 0 0 10px #FFD700; }
+
+.btn {
+  background: transparent;
+  border: 1px solid #FFD700;
+  color: #fff;
+  padding: 0.7rem 1.5rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  font-weight: bold;
+  display: block;
+  margin: 1rem auto;
+}
+
+.btn:hover {
+  box-shadow: 0 0 5px #FFD700, 0 0 15px #FFD700, 0 0 30px #FFD700;
+  transform: scale(1.08) translateY(-3px);
+}
+
+.glow { animation: glow-breath 2s infinite ease-in-out; }
+
+@keyframes glow-breath {
+  0%, 100% { box-shadow: 0 0 5px #FFD700; }
+  50% { box-shadow: 0 0 15px #FFD700, 0 0 30px #FFD700; }
+}
+</style>
+{% endblock %}

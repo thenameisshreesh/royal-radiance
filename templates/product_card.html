@@ -1,0 +1,18 @@
+<div class="card product-card">
+  <div class="card-media">
+    {% if p.image %}
+      <img src="{{ url_for('uploads', filename=p.image) }}" alt="{{ p.name }}">
+    {% else %}
+      <img src="{{ url_for('static', filename='images/sample_product.jpg') }}" alt="Sample">
+    {% endif %}
+  </div>
+  <div class="card-body">
+    <h3>{{ p.name }}</h3>
+    <p class="excerpt">{{ p.short_desc }}</p>
+    <div class="card-footer">
+      <div class="price">₹ {{ "%.2f"|format(p.price) }}</div><br>
+      <a class="btn-small" href="{{ url_for('contact') }}" style="color: #ffffff;">Buy</a>
+
+    </div>
+  </div>
+</div>

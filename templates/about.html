@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}About{% endblock %}
+{% block content %}
+<section class="wrap about">
+  <h2>About Royal Radiance</h2>
+  <div class="about-body">
+    <div class="flicker-bg"></div>
+    <div class="about-text">{{ about_text|safe }}</div>
+  </div>
+</section>
+{% endblock %}

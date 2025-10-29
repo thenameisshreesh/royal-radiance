@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Not Found{% endblock %}
+{% block content %}
+<section class="wrap center">
+  <h2>404 — Not found</h2>
+  <p>We couldn't find that page.</p>
+  <a class="btn" href="{{ url_for('home') }}">Go Home</a>
+</section>
+{% endblock %}

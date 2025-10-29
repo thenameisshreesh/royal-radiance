@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Blog{% endblock %}
+{% block content %}
+<section class="wrap blog-list">
+  <h2>Stories & Tips</h2>
+  <div class="grid blog-grid">
+    {% for post in posts %}
+      <article class="card blog-card">
+        <a href="{{ url_for('blog_post', bid=post.id) }}">
+          {% if post.image %}
+            <img src="{{ url_for('uploads', filename=post.image) }}" alt="{{ post.title }}">
+          {% else %}
+            <img src="{{ url_for('static', filename='images/sample_blog.jpg') }}" alt="blog">
+          {% endif %}
+          <div class="card-body">
+            <h3>{{ post.title }}</h3>
+            <p class="excerpt">{{ post.excerpt }}</p>
+            <span class="read-more">Read More →</span>
+          </div>
+        </a>
+      </article>
+    {% endfor %}
+    {% if posts|length == 0 %}
+      <p class="muted">No blog posts yet — add some from admin.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

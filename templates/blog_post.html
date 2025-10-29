@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ post.title }}{% endblock %}
+{% block content %}
+<section class="wrap blog-post">
+  <h2>{{ post.title }}</h2>
+  {% if post.image %}
+    <img class="post-image" src="{{ url_for('uploads', filename=post.image) }}" alt="{{ post.title }}">
+  {% endif %}
+  <div class="post-content">{{ post.content|safe }}</div>
+</section>
+{% endblock %}

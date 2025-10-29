@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Admin Blogs{% endblock %}
+{% block content %}
+<section class="wrap">
+  <h2>🕯️ Manage Blogs</h2>
+
+  <form method="post" enctype="multipart/form-data" class="admin-form">
+    <label>Title <input name="title" required></label>
+    <label>Excerpt <input name="excerpt"></label>
+    <label>Content <textarea name="content" rows="6"></textarea></label>
+    <label>Image <input name="image" type="file"></label>
+    <button class="btn glow" type="submit">Add Blog</button>
+  </form>
+
+  <h3>Existing Blogs</h3>
+  <div class="grid blog-grid">
+    {% for b in posts %}
+      <div class="card">
+        {% if b.image %}
+          <img src="{{ url_for('uploads', filename=b.image) }}">
+        {% endif %}
+        <div class="card-body">
+          <h4>{{ b.title }}</h4>
+          <form method="post" action="{{ url_for('admin_blogs_delete', bid=b.id) }}" onsubmit="return confirm('Delete?');">
+            <button class="btn small danger">Delete</button>
+          </form>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<style>
+body {
+  background: #000;
+  color: #fff;
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+}
+h2, h3 { text-align: center; color: #FFD700; text-shadow: 0 0 10px #FFD700; }
+
+.admin-form {
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1rem auto;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 0 15px rgba(255,215,0,0.2);
+}
+
+.admin-form label {
+  display: block;
+  margin-bottom: 1rem;
+  color: #fff;
+}
+
+.admin-form input, .admin-form textarea {
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #FFD700;
+  background: #111;
+  color: #fff;
+  outline: none;
+  transition: 0.3s ease;
+}
+
+.admin-form input:focus, .admin-form textarea:focus {
+  box-shadow: 0 0 10px #FFD700;
+}
+
+.btn {
+  background: transparent;
+  border: 1px solid #FFD700;
+  color: #fff;
+  padding: 0.7rem 1.5rem;
+  border-radius: 10px;
+  cursor: pointer;
+  display: block;
+  margin: 1rem auto;
+  transition: all 0.3s ease-in-out;
+  font-weight: bold;
+}
+
+.btn:hover {
+  box-shadow: 0 0 5px #FFD700, 0 0 15px #FFD700, 0 0 30px #FFD700;
+  transform: scale(1.08) translateY(-3px);
+}
+
+.glow {
+  animation: glow-breath 2s infinite ease-in-out;
+}
+
+@keyframes glow-breath {
+  0%, 100% { box-shadow: 0 0 5px #FFD700; }
+  50% { box-shadow: 0 0 15px #FFD700, 0 0 30px #FFD700; }
+}
+
+.card {
+  background: rgba(255,255,255,0.05);
+  padding: 1rem;
+  border-radius: 10px;
+  text-align: center;
+  color: white;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 0 15px #FFD700;
+}
+
+.card img {
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 0.6rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+</style>
+{% endblock %}
