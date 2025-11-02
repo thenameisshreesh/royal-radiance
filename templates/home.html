@@ -23,10 +23,9 @@ body {
   max-width: 800px;
   transform: translate(-50%, -50%);
   z-index: 0;
-  opacity: 0.2; /* adjust opacity for faint effect */
-  pointer-events: none; /* so clicks pass through */
+  opacity: 0.2;
+  pointer-events: none;
 }
-
 .bg-flame video {
   width: 100%;
   height: auto;
@@ -39,7 +38,7 @@ section {
   transform: translateY(40px);
   animation: fadeUp 1.5s ease forwards;
   position: relative;
-  z-index: 1; /* above background video */
+  z-index: 1;
 }
 @keyframes fadeUp {
   to {
@@ -52,13 +51,12 @@ section {
 .hero-title {
   font-family: "Great Vibes", cursive;
   font-size: 4rem;
-  margin: 0;
-  color: #ffffff; /* golden for hero title */
+  margin: 40px 0 0 60px; /* margin from top and left */
+  color: #ffffff;
   text-shadow: 0 2px 10px rgba(255,255,255,0.06);
   transition: all 0.4s ease-in-out;
   cursor: default;
 }
-
 .hero-title:hover {
   text-shadow:
       0 0 5px #fff68e,
@@ -70,7 +68,7 @@ section {
 
 /* ===== Button Style ===== */
 .btn {
-  background-color: #000000;
+  background-color: #000;
   color: #fff;
   border: none;
   padding: 0.7rem 1.5rem;
@@ -82,7 +80,6 @@ section {
   border-radius: 5px;
   z-index: 1;
 }
-
 .btn:hover {
   box-shadow:
       0 0 5px #fff68e,
@@ -115,13 +112,25 @@ section {
   z-index: 1;
 }
 
+.hero-right {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
 .hero-candle {
-  width: 350px;
+  width: 300px;
   border-radius: 12px;
   box-shadow: 0 0 20px rgba(255,255,255,0.3);
   transition: all 0.5s ease-in-out;
   z-index: 1;
+  opacity: 0;
+  transform: scale(0.95);
 }
+
+
 
 .hero-candle:hover {
   transform: scale(1.05) rotate(-2deg);
@@ -138,7 +147,6 @@ section {
   position: relative;
   z-index: 1;
 }
-
 .products-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -146,37 +154,20 @@ section {
   position: relative;
   z-index: 1;
 }
-
 .products-grid img {
   border-radius: 12px;
   transition: transform 0.4s ease, box-shadow 0.4s ease;
 }
-
 .products-grid img:hover {
   transform: scale(1.05);
   box-shadow: 0 0 25px rgba(255,255,255,0.4);
 }
-
 .center {
   text-align: center;
   margin: 2rem 0;
   position: relative;
   z-index: 1;
 }
-
-/* smooth scroll reveal */
-@keyframes fadeSlide {
-  from {
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-
 .card {
   background: rgba(255,255,255,0.05);
   padding: 1rem;
@@ -185,14 +176,11 @@ section {
   color: white;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-
 .card:hover { transform: translateY(-8px); box-shadow: 0 0 15px #FFD700; }
-
 </style>
 {% endblock %}
 
 {% block content %}
-
 <!-- Background flame video element -->
 <div class="bg-flame">
   <video autoplay muted loop playsinline>
@@ -200,6 +188,7 @@ section {
   </video>
 </div>
 
+<!-- Hero Section -->
 <section class="hero">
   <div class="wrap hero-inner">
     <div class="hero-left">
@@ -212,13 +201,19 @@ section {
       </div>
     </div>
     <div class="hero-right">
-      <video autoplay muted loop playsinline width="350" class="hero-candle">
-        <source src="{{ url_for('static', filename='images/') }}" type="video/mp4">
-      </video>
+      <img src="{{ url_for('static', filename='images/show1.jpg') }}" alt="Candle 1" class="hero-candle">
+      <img src="{{ url_for('static', filename='images/show2.jpg') }}" alt="Candle 2" class="hero-candle">
+      <img src="{{ url_for('static', filename='images/show3.jpg') }}" alt="Candle 3" class="hero-candle">
     </div>
   </div>
 </section>
 
+<!-- Glowing Animation Canvas -->
+<svg id="glow-paths" width="100%" height="120vh"
+     style="position:absolute; top:0; left:0; pointer-events:none; z-index:99;">
+</svg>
+
+<!-- Product Section -->
 <section class="catalog-preview wrap">
   <h2>Featured Collection</h2>
   <div class="grid products-grid">
@@ -233,5 +228,85 @@ section {
     <a class="btn ghost" href="{{ url_for('catalog') }}">View All</a>
   </div>
 </section>
+{% endblock %}
 
+
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const candles = document.querySelectorAll(".hero-candle");
+  const startEl = document.querySelector(".hero-title");
+  
+  if (!startEl || candles.length === 0) {
+    console.warn("[Glow] Required elements missing.");
+    return;
+  }
+
+  // Wait until all hero images load
+  let imagesLoaded = 0;
+  candles.forEach(img => {
+    if (img.complete) imagesLoaded++;
+    else img.addEventListener("load", () => {
+      imagesLoaded++;
+      if (imagesLoaded === candles.length) runGlow();
+    });
+  });
+
+  if (imagesLoaded === candles.length) runGlow();
+
+  function runGlow() {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.style.position = "fixed";
+    svg.style.top = 0;
+    svg.style.left = 0;
+    svg.style.width = "100%";
+    svg.style.height = "100%";
+    svg.style.pointerEvents = "none";
+    svg.style.zIndex = 9999;
+    document.body.appendChild(svg);
+
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    defs.innerHTML = `
+      <filter id="glow"><feGaussianBlur stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    `;
+    svg.appendChild(defs);
+
+    const start = startEl.getBoundingClientRect();
+    const startX = start.left + start.width / 2;
+    const startY = start.top + start.height / 2;
+
+    candles.forEach((c, i) => {
+      const end = c.getBoundingClientRect();
+      const endX = end.left + end.width / 2;
+      const endY = end.top + end.height / 2;
+
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke", "#FFD700");
+      path.setAttribute("stroke-width", "3");
+      path.setAttribute("filter", "url(#glow)");
+
+      const midX = (startX + endX) / 2;
+      const midY = Math.min(startY, endY) - 100;
+      const d = `M${startX},${startY} Q${midX},${midY} ${endX},${endY}`;
+      path.setAttribute("d", d);
+      path.style.strokeDasharray = path.getTotalLength();
+      path.style.strokeDashoffset = path.getTotalLength();
+      svg.appendChild(path);
+
+      setTimeout(() => {
+        path.style.transition = "stroke-dashoffset 1.5s ease-in-out";
+        path.style.strokeDashoffset = 0;
+
+        setTimeout(() => {
+          c.style.transition = "opacity 1s ease, transform 1s ease";
+          c.style.opacity = 1;
+          c.style.transform = "scale(1)";
+        }, 1400);
+      }, i * 1000);
+    });
+  }
+});
+</script>
 {% endblock %}

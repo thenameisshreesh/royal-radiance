@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Royal Radiance — {% block title %}{% endblock %}</title>
 
-  <!-- Fonts -->
+  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
 
   <!-- Main CSS -->
@@ -14,83 +14,16 @@
   <script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
   <script defer src="{{ url_for('static', filename='js/flame-cursor.js') }}"></script>
   {% block head %}{% endblock %}
-</head>
 
-<body class="theme-blue-black">
-  <!-- Loading screen -->
-  <div id="loader" class="loader">
-    <div class="loader-flame"></div>
-    <p>Lighting Your Story…</p>
-  </div>
-
-  <!-- Header / Navigation -->
-  <header class="site-header">
-    <div class="wrap header-wrap">
-      <a href="{{ url_for('home') }}" class="logo">
-        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Royal Radiance" onerror="this.style.display='none'"/>
-      </a>
-
-      <nav class="nav">
-        <a href="{{ url_for('home') }}">Home</a>
-        <a href="{{ url_for('about') }}">About</a>
-        <a href="{{ url_for('catalog') }}">Catalog</a>
-        <a href="{{ url_for('blog') }}">Blog</a>
-        <a href="{{ url_for('contact') }}">Contact</a>
-      </nav>
-
-      <div class="mobile-menu">☰</div>
-    </div>
-  </header>
-
-  <!-- Main content -->
-  <main>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="flashes">
-        {% for category, msg in messages %}
-          <div class="flash {{ category }}">{{ msg }}</div>
-        {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
-    {% block content %}{% endblock %}
-  </main>
-
-  <!-- Footer -->
-  <footer class="site-footer">
-    <div class="wrap footer-grid">
-      <div class="footer-col">
-        <h3>Royal Radiance</h3>
-        <p>Handcrafted candles that light your stories — rich, fragrant, and timeless.</p>
-        <p>&copy; Royal Radiance 2025. All rights reserved.</p>
-      </div>
-
-      <div class="footer-col">
-        <h3>Contact Us</h3>
-        <p>📧 care@royalradiance.in</p>
-        <p>📞 +91 62323 62323</p>
-        <p>📸 <a href="#">Instagram</a></p>
-      </div>
-
-      <div class="footer-col">
-        <h3>Quick Links</h3>
-        <ul>
-          <li><a href="#">FAQs</a></li>
-          <li><a href="#">Delivery and Returns</a></li>
-          <li><a href="#">Terms and Conditions</a></li>
-        </ul>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Mobile floating flame -->
-  <div id="floating-flame" class="floating-flame" aria-hidden="true"></div>
-
-  <!-- WhatsApp button -->
-  <a class="whatsapp" href="https://wa.me/YOURNUMBER" target="_blank" aria-label="Chat on WhatsApp">💬</a>
-
-  <!-- Custom CSS: Black theme + Golden hover -->
   <style>
+    /* ===== CUSTOM FONT ===== */
+    @font-face {
+      font-family: 'Cabin';
+      src: url("{{ url_for('static', filename='fonts/cabin.ttf') }}") format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
     /* === FULL BLACK HEADER === */
     .site-header {
       width: 100%;
@@ -111,56 +44,94 @@
       padding: 0 5%;
     }
 
-    /* === LOGO === */
-    .logo img {
-  height: 60px;
+    /* === LOGO (split candle + name) === */
+    .logo-combo {
+      display: flex;
+      align-items: center;
+      gap: 4px; /* Slight gap so they look continuous */
+    }
+
+    /* Candle part with glowing animation */
+    .logo-candle {
+      height: 55px; /* unified size */
+      object-fit: contain;
+      animation: candle-breath 2.5s infinite ease-in-out;
+      transition: all 0.4s ease-in-out;
+    }
+
+    /* Name part same size, no animation */
+    .logo-name {
+  height: 55px;        /* same height as candle */
+  width: auto;          /* auto width keeps proportions */
+  max-width: 210px;     /* reduce overall width */
   object-fit: contain;
-  transition: all 0.4s ease-in-out;
-  animation: logo-breath 2s infinite ease-in-out;
-}
-
-/* Less intense breathing glow */
-@keyframes logo-breath {
-  0% {
-    filter: drop-shadow(0 0 3px #FFD700)
-            drop-shadow(0 0 5px #FFD700)
-            drop-shadow(0 0 7px #FFD700);
-  }
-  50% {
-    filter: drop-shadow(0 0 6px #FFD700)
-            drop-shadow(0 0 10px #FFD700)
-            drop-shadow(0 0 14px #FFD700);
-  }
-  100% {
-    filter: drop-shadow(0 0 3px #FFD700)
-            drop-shadow(0 0 5px #FFD700)
-            drop-shadow(0 0 7px #FFD700);
-  }
+  display: block;
+  margin-left: 10px;
+  margin-top: 10px;
+  
+  
 }
 
 
-
-    
+    /* === Breathing Glow Animation (for candle only) === */
+    @keyframes candle-breath {
+      0% {
+        filter: drop-shadow(0 0 3px #FFD700)
+                drop-shadow(0 0 5px #FFD700)
+                drop-shadow(0 0 8px #FFD700);
+      }
+      50% {
+        filter: drop-shadow(0 0 8px #FFD700)
+                drop-shadow(0 0 14px #FFD700)
+                drop-shadow(0 0 20px #FFD700);
+      }
+      100% {
+        filter: drop-shadow(0 0 3px #FFD700)
+                drop-shadow(0 0 5px #FFD700)
+                drop-shadow(0 0 8px #FFD700);
+      }
+    }
 
     /* === NAVIGATION === */
     .nav a {
-  color: #fff; /* keep text white */
-  text-decoration: none;
-  margin-left: 1.5rem;
-  font-weight: 600;
-  transition: all 0.3s ease-in-out;
-  position: relative;
-  padding: 0.3rem 0.6rem;
-  border-radius: 5px;
-}
+      font-family: 'Cabin', 'Playfair Display', serif;
+      color: #fff;
+      text-decoration: none;
+      margin-left: 1.5rem;
+      font-weight: 600;
+      transition: all 0.3s ease-in-out;
+      position: relative;
+      padding: 0.3rem 0.6rem;
+      border-radius: 5px;
+    }
 
-.nav a:hover {
-  filter: drop-shadow(0 0 5px #FFD700)
-              drop-shadow(0 0 10px #FFD700)
-              drop-shadow(0 0 20px #FFD700);
-  transform: scale(1.05);
-}
+    .nav a {
+      position: relative;
+      overflow: hidden;
+    }
 
+    .nav a::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: radial-gradient(circle, rgba(255, 215, 0, 0.5) 0%, transparent 70%);
+      transform: translate(-50%, -50%);
+      transition: all 0.3s ease;
+      border-radius: 50%;
+      z-index: -1;
+    }
+
+    .nav a:hover::before {
+      width: 200%;
+      height: 400%;
+    }
+
+    .nav a:hover {
+      transform: scale(1.05);
+    }
 
     /* === FOOTER === */
     .site-footer {
@@ -211,9 +182,8 @@
       filter: drop-shadow(0 0 5px #FFD700)
               drop-shadow(0 0 10px #FFD700)
               drop-shadow(0 0 20px #FFD700);
-  transform: scale(1.05);
-}
-    
+      transform: scale(1.05);
+    }
 
     .footer-col ul {
       padding: 0;
@@ -243,5 +213,60 @@
       }
     }
   </style>
+</head>
+
+<body class="theme-blue-black">
+  <header class="site-header">
+    <div class="wrap header-wrap">
+      <a href="{{ url_for('home') }}" class="logo">
+        <div class="logo-combo">
+          <img src="{{ url_for('static', filename='images/candal.png') }}" 
+               alt="Candle" class="logo-candle" />
+          <img src="{{ url_for('static', filename='images/name.png') }}" 
+               alt="Royal Radiance Text" class="logo-name" />
+        </div>
+      </a>
+
+      <nav class="nav">
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('about') }}">About</a>
+        <a href="{{ url_for('catalog') }}">Catalog</a>
+        <a href="{{ url_for('blog') }}">Blog</a>
+        <a href="{{ url_for('contact') }}">Contact</a>
+      </nav>
+
+      <div class="mobile-menu">☰</div>
+    </div>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-grid">
+      <div class="footer-col">
+        <h3>Royal Radiance</h3>
+        <p>Handcrafted candles that light your stories — rich, fragrant, and timeless.</p>
+        <p>&copy; Royal Radiance 2025. All rights reserved.</p>
+      </div>
+
+      <div class="footer-col">
+        <h3>Contact Us</h3>
+        <p>📧 care@royalradiance.in</p>
+        <p>📞 +91 62323 62323</p>
+        <p>📸 <a href="#">Instagram</a></p>
+      </div>
+
+      <div class="footer-col">
+        <h3>Quick Links</h3>
+        <ul>
+          <li><a href="#">FAQs</a></li>
+          <li><a href="#">Delivery and Returns</a></li>
+          <li><a href="#">Terms and Conditions</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>
