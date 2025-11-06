@@ -1,10 +1,72 @@
 {% extends "base.html" %}
 {% block title %}Catalog{% endblock %}
 {% block content %}
-<section class="wrap catalog">
-  <h2>Catalog</h2>
+<style>
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+.video-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+}
+.video-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.65);
+  z-index: -1;
+}
+.wrap.catalog {
+  position: relative;
+  color: #fff;
+  text-align: center;
+  padding: 80px 20px;
+}
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 25px;
+  padding-top: 30px;
+}
+.card.product-card {
+  background: rgba(0,0,0,0.7);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card.product-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+.card.product-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 0 20px #ffee91;
+}
+@media (max-width: 768px) {
+  .wrap.catalog {
+    padding: 60px 15px;
+  }
+}
+</style>
 
-  <div class="grid products-grid">
+<video class="video-bg" autoplay muted loop playsinline>
+  <source src="{{ url_for('static', filename='images/cg.mp4') }}" type="video/mp4">
+</video>
+<div class="video-overlay"></div>
+
+<section class="wrap catalog">
+  <h2>Collection</h2>
+  <div class="products-grid">
     {% for p in products %}
       {% include 'product_card.html' %}
     {% endfor %}
@@ -13,70 +75,4 @@
     {% endif %}
   </div>
 </section>
-
-<style>
-/* --- Product Card Hover Glow (#FFEE91) --- */
-.card.product-card {
-  position: relative;
-  background: #000;
-  border-radius: 12px;
-  overflow: visible;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-  transition: transform 0.35s ease, box-shadow 0.35s ease, z-index 0.35s ease;
-  z-index: 1;
-}
-
-/* Hover glow and lift (same as your card-body hover) */
-.card.product-card:hover {
-  transform: translateY(-10px);
-  z-index: 10;
-  box-shadow:
-    0 0 15px #ffee91,
-    0 0 30px #ffee91,
-    0 0 45px #ffee91,
-    0 0 60px #ffee91 inset,
-    0 12px 35px rgba(255, 213, 128, 0.6);
-}
-
-/* Slight image zoom on hover */
-.card.product-card img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  transition: transform 0.4s ease;
-}
-
-.card.product-card:hover img {
-  transform: scale(1.05);
-}
-
-/* Smooth breathing glow animation for premium feel */
-.card.product-card:hover {
-  animation: glowBreath 2.5s ease-in-out infinite;
-}
-
-@keyframes glowBreath {
-  0% {
-    box-shadow:
-      0 0 15px rgba(255, 238, 145, 0.6),
-      0 0 30px rgba(255, 238, 145, 0.4),
-      0 0 45px rgba(255, 238, 145, 0.3),
-      0 0 60px rgba(255, 238, 145, 0.2) inset;
-  }
-  50% {
-    box-shadow:
-      0 0 25px rgba(255, 238, 145, 0.9),
-      0 0 40px rgba(255, 238, 145, 0.6),
-      0 0 55px rgba(255, 238, 145, 0.4),
-      0 0 70px rgba(255, 238, 145, 0.3) inset;
-  }
-  100% {
-    box-shadow:
-      0 0 15px rgba(255, 238, 145, 0.6),
-      0 0 30px rgba(255, 238, 145, 0.4),
-      0 0 45px rgba(255, 238, 145, 0.3),
-      0 0 60px rgba(255, 238, 145, 0.2) inset;
-  }
-}
-</style>
 {% endblock %}

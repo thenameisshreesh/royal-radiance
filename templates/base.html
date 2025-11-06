@@ -44,36 +44,30 @@
       padding: 0 5%;
     }
 
-    /* === LOGO (split candle + name) === */
+    /* === LOGO === */
     .logo-combo {
       display: flex;
       align-items: center;
-      gap: 4px; /* Slight gap so they look continuous */
+      gap: 4px;
     }
 
-    /* Candle part with glowing animation */
     .logo-candle {
-      height: 55px; /* unified size */
+      height: 55px;
       object-fit: contain;
       animation: candle-breath 2.5s infinite ease-in-out;
       transition: all 0.4s ease-in-out;
     }
 
-    /* Name part same size, no animation */
     .logo-name {
-  height: 55px;        /* same height as candle */
-  width: auto;          /* auto width keeps proportions */
-  max-width: 210px;     /* reduce overall width */
-  object-fit: contain;
-  display: block;
-  margin-left: 10px;
-  margin-top: 10px;
-  
-  
-}
+      height: 55px;
+      width: auto;
+      max-width: 210px;
+      object-fit: contain;
+      display: block;
+      margin-left: 10px;
+      margin-top: 10px;
+    }
 
-
-    /* === Breathing Glow Animation (for candle only) === */
     @keyframes candle-breath {
       0% {
         filter: drop-shadow(0 0 3px #FFD700)
@@ -157,7 +151,7 @@
 
     .footer-col {
       flex: 1;
-      min-width: 250px;
+      min-width: 220px; /* FIX: Prevents column 4 from wrapping early */
     }
 
     .footer-col h3 {
@@ -203,13 +197,57 @@
         cursor: pointer;
       }
 
+      /* FIX: Center footer columns on mobile */
       .footer-grid {
         flex-direction: column;
+        align-items: center;
+        justify-content: center;
         text-align: center;
+      }
+
+      .footer-col {
+        width: 100%;
+        max-width: 400px;
       }
 
       .footer-col h3 {
         margin-top: 1rem;
+      }
+    }
+
+    /* === MOBILE DROPDOWN FIX === */
+    @media (max-width: 768px) {
+      .nav {
+        display: none;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        left: 0;
+        background: #000;
+        border-top: 1px solid rgba(255,255,255,0.05);
+        padding: 1rem 5%;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+        z-index: 999;
+        flex-direction: column;
+        gap: 0.6rem;
+        align-items: flex-start;
+      }
+
+      .nav.open {
+        display: flex !important;
+        animation: dropdown 220ms ease-out;
+      }
+
+      @keyframes dropdown {
+        from { transform: translateY(-6px); opacity: 0; }
+        to   { transform: translateY(0); opacity: 1; }
+      }
+
+      .nav a {
+        width: 100%;
+        padding: 0.6rem 0.4rem;
+        margin-left: 0;
+        border-radius: 6px;
       }
     }
   </style>
@@ -229,10 +267,10 @@
 
       <nav class="nav">
         <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('catalog') }}">Collection</a>
         <a href="{{ url_for('about') }}">About</a>
-        <a href="{{ url_for('catalog') }}">Catalog</a>
         <a href="{{ url_for('blog') }}">Blog</a>
-        <a href="{{ url_for('contact') }}">Contact</a>
+        <a href="{{ url_for('contact') }}">Contact Us</a>
       </nav>
 
       <div class="mobile-menu">☰</div>
@@ -245,28 +283,78 @@
 
   <footer class="site-footer">
     <div class="wrap footer-grid">
+
+      <!-- COLUMN 1: GET IN TOUCH -->
       <div class="footer-col">
-        <h3>Royal Radiance</h3>
-        <p>Handcrafted candles that light your stories — rich, fragrant, and timeless.</p>
-        <p>&copy; Royal Radiance 2025. All rights reserved.</p>
+        <h3>GET IN TOUCH</h3>
+        <p>📞 WhatsApp: +91 99801 27955</p>
+        <p>Mon–Sat 10AM – 6PM IST</p>
+        <p>📧 Email: help@royalradiance.in</p>
+        
       </div>
 
+      <!-- COLUMN 2: NEED HELP -->
       <div class="footer-col">
-        <h3>Contact Us</h3>
-        <p>📧 care@royalradiance.in</p>
-        <p>📞 +91 62323 62323</p>
-        <p>📸 <a href="#">Instagram</a></p>
-      </div>
-
-      <div class="footer-col">
-        <h3>Quick Links</h3>
+        <h3>NEED HELP</h3>
         <ul>
           <li><a href="#">FAQs</a></li>
-          <li><a href="#">Delivery and Returns</a></li>
-          <li><a href="#">Terms and Conditions</a></li>
+          <li><a href="#">Track Order</a></li>
+          <li><a href="#">Store Locator</a></li>
+          <li><a href="#">Return & Exchange</a></li>
+          <li><a href="#">Site Map</a></li>
         </ul>
       </div>
+
+      <!-- COLUMN 3: ABOUT US -->
+      <div class="footer-col">
+        <h3>ABOUT US</h3>
+        <ul>
+          <li><a href="#">Our Story</a></li>
+          <li><a href="#">#WithRoyalRadiance Community</a></li>
+          <li><a href="#">Corporate Gifts</a></li>
+          <li><a href="#">Royal Radiance Daily</a></li>
+        </ul>
+      </div>
+
+      <!-- COLUMN 4: COMPANY -->
+      <div class="footer-col">
+        <h3>COMPANY</h3>
+        <ul>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Use</a></li>
+          <li><a href="#">Contact Us</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div style="text-align:center;margin-top:2.5rem;color:#999;font-size:0.9rem;border-top:1px solid rgba(255,255,255,0.1);padding-top:1rem;">
+      &copy; 2025 Royal Radiance. All rights reserved.
     </div>
   </footer>
+
+  <!-- Mobile Dropdown Toggle Script -->
+  <script>
+    (function() {
+      const btn = document.querySelector('.mobile-menu');
+      const nav = document.querySelector('.nav');
+      if (!btn || !nav) return;
+      const SHOW_ICON = '☰';
+      const CLOSE_ICON = '✕';
+      if (!btn.textContent.trim()) btn.textContent = SHOW_ICON;
+      btn.addEventListener('click', function() {
+        const opened = nav.classList.toggle('open');
+        btn.textContent = opened ? CLOSE_ICON : SHOW_ICON;
+        document.body.style.overflow = opened ? 'hidden' : '';
+      });
+      nav.addEventListener('click', function(e) {
+        if (e.target.tagName === 'A' && window.matchMedia('(max-width: 768px)').matches) {
+          nav.classList.remove('open');
+          btn.textContent = SHOW_ICON;
+          document.body.style.overflow = '';
+        }
+      });
+    })();
+  </script>
 </body>
 </html>

@@ -59,10 +59,10 @@ section {
 }
 .hero-title:hover {
   text-shadow:
-      0 0 5px #fff68e,
-      0 0 10px #fff68e,
-      0 0 20px #fff68e,
-      0 0 30px #fff68e;
+      0 0 5px #e8cd33,
+      0 0 10px #e8cd33,
+      0 0 20px #e8cd33,
+      0 0 30px #e8cd33;
   transform: scale(1.05);
 }
 
@@ -82,10 +82,10 @@ section {
 }
 .btn:hover {
   box-shadow:
-      0 0 5px #fff68e,
-      0 0 10px #fff68e,
-      0 0 20px #fff68e,
-      0 0 30px #fff68e;
+      0 0 5px #e8cd33,
+      0 0 10px #e8cd33,
+      0 0 20px #e8cd33,
+      0 0 30px #e8cd33;
   transform: scale(1.08) translateY(-3px);
   z-index: 2;
 }
@@ -94,7 +94,7 @@ section {
 .special-offer {
   margin-top: 1rem;
   font-size: 0.95rem;
-  color: #d4af37;
+  color: #e8cd33;
   text-shadow: 0 0 8px rgba(255,255,255,0.2);
   z-index: 1;
 }
@@ -139,7 +139,7 @@ section {
 
 /* ===== Product Section ===== */
 .catalog-preview h2 {
-  color: #FFD700;
+  color: #e8cd33;
   text-align: center;
   font-size: 2rem;
   margin-top: 3rem;
@@ -176,7 +176,7 @@ section {
   color: white;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-.card:hover { transform: translateY(-8px); box-shadow: 0 0 15px #FFD700; }
+.card:hover { transform: translateY(-8px); box-shadow: 0 0 15px #e8cd33; }
 </style>
 {% endblock %}
 
@@ -229,84 +229,123 @@ section {
   </div>
 </section>
 {% endblock %}
-
-
-
 {% block scripts %}
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const candles = document.querySelectorAll(".hero-candle");
-  const startEl = document.querySelector(".hero-title");
-  
-  if (!startEl || candles.length === 0) {
-    console.warn("[Glow] Required elements missing.");
+  if (candles.length === 0) {
+    console.warn("[GlowLine] No hero candles found.");
     return;
   }
 
-  // Wait until all hero images load
-  let imagesLoaded = 0;
+  // Wait for images to load
+  let loaded = 0;
   candles.forEach(img => {
-    if (img.complete) imagesLoaded++;
+    if (img.complete) loaded++;
     else img.addEventListener("load", () => {
-      imagesLoaded++;
-      if (imagesLoaded === candles.length) runGlow();
+      loaded++;
+      if (loaded === candles.length) startAnimation();
     });
   });
+  if (loaded === candles.length) startAnimation();
 
-  if (imagesLoaded === candles.length) runGlow();
-
-  function runGlow() {
+  function startAnimation() {
+    // Create SVG layer
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.style.position = "fixed";
-    svg.style.top = 0;
-    svg.style.left = 0;
-    svg.style.width = "100%";
-    svg.style.height = "100%";
-    svg.style.pointerEvents = "none";
-    svg.style.zIndex = 9999;
+    Object.assign(svg.style, {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      pointerEvents: "none",
+      zIndex: 9999,
+    });
     document.body.appendChild(svg);
 
+    // Define glowing filter (with chamaki)
     const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
     defs.innerHTML = `
-      <filter id="glow"><feGaussianBlur stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <filter id="superGlow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="12" result="blur1" />
+        <feGaussianBlur stdDeviation="22" result="blur2" />
+        <feGaussianBlur stdDeviation="35" result="blur3" />
+        <feMerge>
+          <feMergeNode in="blur1"/>
+          <feMergeNode in="blur2"/>
+          <feMergeNode in="blur3"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+
+      <!-- gradient shimmer -->
+      <linearGradient id="goldGradient" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#fff8b0">
+          <animate attributeName="offset" values="0;1;0" dur="2s" repeatCount="indefinite"/>
+        </stop>
+        <stop offset="100%" stop-color="#e8cd33">
+          <animate attributeName="offset" values="1;0;1" dur="2s" repeatCount="indefinite"/>
+        </stop>
+      </linearGradient>
     `;
     svg.appendChild(defs);
 
-    const start = startEl.getBoundingClientRect();
-    const startX = start.left + start.width / 2;
-    const startY = start.top + start.height / 2;
+    // Create shimmering path
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("fill", "none");
+    path.setAttribute("stroke", "url(#goldGradient)");
+    path.setAttribute("stroke-width", "6"); // thicker for 'bunch' effect
+    path.setAttribute("filter", "url(#superGlow)");
+    path.setAttribute("stroke-linecap", "round");
+    svg.appendChild(path);
 
-    candles.forEach((c, i) => {
-      const end = c.getBoundingClientRect();
-      const endX = end.left + end.width / 2;
-      const endY = end.top + end.height / 2;
+    const getCenter = el => {
+      const rect = el.getBoundingClientRect();
+      return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    };
 
-      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      path.setAttribute("fill", "none");
-      path.setAttribute("stroke", "#FFD700");
-      path.setAttribute("stroke-width", "3");
-      path.setAttribute("filter", "url(#glow)");
+    // Function for random curvy line
+    function randomCurve(from, to) {
+      const curveOffsetX = (Math.random() - 0.5) * 200;
+      const curveOffsetY = (Math.random() - 0.5) * 200;
+      const midX = (from.x + to.x) / 2 + curveOffsetX;
+      const midY = (from.y + to.y) / 2 + curveOffsetY;
+      return `M${from.x},${from.y} Q${midX},${midY} ${to.x},${to.y}`;
+    }
 
-      const midX = (startX + endX) / 2;
-      const midY = Math.min(startY, endY) - 100;
-      const d = `M${startX},${startY} Q${midX},${midY} ${endX},${endY}`;
+    function drawLine(from, to, callback) {
+      const d = randomCurve(from, to);
       path.setAttribute("d", d);
-      path.style.strokeDasharray = path.getTotalLength();
-      path.style.strokeDashoffset = path.getTotalLength();
-      svg.appendChild(path);
+      const length = path.getTotalLength();
+      path.style.transition = "none";
+      path.style.strokeDasharray = length;
+      path.style.strokeDashoffset = length;
+      path.getBoundingClientRect(); // force reflow
+      path.style.transition = "stroke-dashoffset 2s ease-in-out";
+      path.style.strokeDashoffset = "0";
+      setTimeout(() => callback && callback(), 2000);
+    }
 
+    // start from middle of viewport
+    let current = { 
+      x: window.innerWidth / 2 + (Math.random() - 0.5) * 200,
+      y: window.innerHeight / 2 + (Math.random() - 0.5) * 100
+    };
+
+    // Sequential glowing animation
+    candles.forEach((candle, index) => {
       setTimeout(() => {
-        path.style.transition = "stroke-dashoffset 1.5s ease-in-out";
-        path.style.strokeDashoffset = 0;
-
-        setTimeout(() => {
-          c.style.transition = "opacity 1s ease, transform 1s ease";
-          c.style.opacity = 1;
-          c.style.transform = "scale(1)";
-        }, 1400);
-      }, i * 1000);
+        const next = getCenter(candle);
+        drawLine(current, next, () => {
+          candle.style.transition = "opacity 1s ease, transform 1s ease";
+          candle.style.opacity = 1;
+          candle.style.transform = "scale(1)";
+          current = next;
+        });
+      }, index * 2300);
     });
   }
 });
 </script>
 {% endblock %}
+

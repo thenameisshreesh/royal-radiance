@@ -1,10 +1,58 @@
 {% extends "base.html" %}
 {% block title %}About{% endblock %}
 {% block content %}
+<style>
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+.video-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+}
+.video-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.65);
+  z-index: -1;
+}
+.wrap.about {
+  position: relative;
+  color: #fff;
+  text-align: center;
+  padding: 80px 20px;
+}
+.about-body {
+  background: rgba(0,0,0,0.6);
+  padding: 25px;
+  border-radius: 12px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+@media (max-width: 768px) {
+  .wrap.about {
+    padding: 60px 15px;
+  }
+}
+</style>
+
+<video class="video-bg" autoplay muted loop playsinline>
+  <source src="{{ url_for('static', filename='images/cg.mp4') }}" type="video/mp4">
+</video>
+<div class="video-overlay"></div>
+
 <section class="wrap about">
   <h2>About Royal Radiance</h2>
   <div class="about-body">
-    <div class="flicker-bg"></div>
     <div class="about-text">{{ about_text|safe }}</div>
   </div>
 </section>
