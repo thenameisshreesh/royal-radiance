@@ -102,18 +102,60 @@ def create_app():
             name = request.form.get('name')
             email = request.form.get('email')
             msg = request.form.get('message')
+
             try:
                 message = Message(
-                    f'Royal Radiance contact from {name}',
-                    recipients=[app.config.get('MAIL_DEFAULT_SENDER')]
-                )
-                message.body = f'From: {name} \nEmail: <{email}>\n\n{msg}'
+                subject=f"🕯️ New Royal Radiance Inquiry from {name}",
+                sender=app.config.get('MAIL_DEFAULT_SENDER'),
+                recipients=[app.config.get('MAIL_DEFAULT_SENDER')],
+                reply_to=email
+            )
+
+            # Use local image (if hosted online or converted to GIF)
+                bg_url = url_for('static', filename='images/cg.gif', _external=True)
+
+                message.html = f"""
+            <html>
+            <body style="
+                margin:0;
+                font-family:'Segoe UI', sans-serif;
+                background: url('{bg_url}') center/cover no-repeat;
+                color:#fff;
+                padding: 0;
+            ">
+                <div style="background: rgba(0,0,0,0.6); padding: 30px;">
+                    <div style="text-align:center; margin-bottom:25px;">
+                        <h1 style="font-family:'Playfair Display',serif; color:#FFD700;">Royal Radiance</h1>
+                        <p style="font-size:14px; color:#ccc;">Handcrafted Candles to Light Your Moments</p>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.1); border-radius:10px; padding:20px;">
+                        <p style="font-size:16px;"><b>👤 Name:</b> {name}</p>
+                        <p style="font-size:16px;"><b>📧 Email:</b> {email}</p>
+                        <hr style="border:0; border-top:1px solid rgba(255,255,255,0.2); margin:20px 0;">
+                        <p style="font-size:15px; line-height:1.6; color:#f1f1f1;">{msg}</p>
+                    </div>
+
+                    <div style="text-align:center; margin-top:30px; font-size:13px; color:#aaa;">
+                        <p>✨ Sent from the Royal Radiance website ✨<br>
+                        <a href="https://yourwebsite.com" style="color:#FFD700; text-decoration:none;">www.royalradiance.com</a></p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+
+                message.body = f"From: {name} <{email}>\n\n{msg}"
                 mail.send(message)
-                flash('Message sent — we will contact you soon', 'success')
+
+                flash('Your message was sent beautifully — we’ll get back soon!', 'success')
+
             except Exception as ex:
                 print('Mail error:', ex)
-                flash('Could not send message - please try again or contact via social links', 'warning')
-            return redirect(url_for('contact'))
+                flash('Could not send message — please try again or reach out via social links.', 'warning')
+
+                return redirect(url_for('contact'))
+
         return render_template('contact.html')
 
     @app.route('/uploads/<path:filename>')
