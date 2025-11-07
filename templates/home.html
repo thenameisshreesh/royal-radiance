@@ -185,6 +185,18 @@ section {
   z-index: 5; /* brings the entire card upfront */
 }
 
+
+/* Ensure full card (not just image) comes upfront */
+.product-card {
+  position: relative;
+  z-index: 1;
+}
+
+.product-card:hover {
+  z-index: 10; /* higher than others */
+}
+
+
 </style>
 {% endblock %}
 

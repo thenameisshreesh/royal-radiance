@@ -7,12 +7,95 @@
     {% endif %}
   </div>
   <div class="card-body">
-    <h3>{{ p.name }}</h3>
+    <h3 class="product-name">{{ p.name }}</h3>
+      <div class="price">${{ "%.2f"|format(p.price) }}</div>
     <p class="excerpt">{{ p.short_desc }}</p>
     <div class="card-footer">
-      <div class="price">₹ {{ "%.2f"|format(p.price) }}</div><br>
-      <a class="btn-small" href="{{ url_for('contact') }}" style="color: #ffffff;">Buy</a>
-
+      <a class="btn-buy" href="{{ url_for('contact') }}">BUY</a>
     </div>
   </div>
 </div>
+
+<style>
+/* ✅ Use your c_gothic font (same folder as Cabin) */
+@font-face {
+  font-family: 'C_Gothic';
+  src: url('C_Gothic.ttf') format('truetype');
+}
+
+.card.product-card {
+  background: rgba(255,255,255,0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  text-align: center;
+  font-family: 'C_Gothic', sans-serif;
+  color: #fff;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  padding: 1rem;
+}
+
+.card.product-card:hover {
+  
+transform: scale(1.05) translateY(-6px);
+box-shadow: 0 0 25px rgba(255, 255, 255, 0.25);
+
+}
+
+/* 🖼️ Image */
+.card.product-card img {
+  width: 100%;
+  border-radius: 10px;
+  margin-bottom: 0.8rem;
+}
+
+/* 🏷️ Product Name */
+.card-body .product-name {
+  font-size: 1.5rem;          /* bigger than price */
+  font-weight: bold;
+  color: #fff;
+  margin: 0.5rem 0;
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.4);
+}
+
+/* 💬 Description */
+.card-body .excerpt {
+  font-size: 1rem;
+  color: #ddd;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+/* 💵 Price */
+.card-footer .price {
+  font-size: 1.2rem;
+  color: #d7ba16;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+/* 🛒 Buy Button */
+.btn-buy {
+  background: #fff;
+  color: #000;
+  font-weight: bold;
+  padding: 0.6rem 1.3rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: 0.3s ease;
+  display: inline-block;
+}
+
+.btn-buy:hover {
+  
+  color: #000;
+  transform: scale(1.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .card-body .product-name { font-size: 1.2rem; }
+  .card-footer .price { font-size: 1.1rem; }
+  .btn-buy { padding: 0.5rem 1.1rem; font-size: 0.9rem; }
+}
+</style>
+

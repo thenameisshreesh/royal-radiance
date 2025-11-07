@@ -31,27 +31,42 @@ body, html {
   text-align: center;
   padding: 80px 20px;
 }
+
+
+
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 25px;
   padding-top: 30px;
 }
+
 .card.product-card {
-  background: rgba(0,0,0,0.7);
-  border-radius: 12px;
-  overflow: hidden;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 1rem;
+  border-radius: 10px;
+  text-align: center;
+  color: white;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  z-index: 1;
 }
+
 .card.product-card img {
   width: 100%;
-  height: 200px;
+  height: 260px; /* same height as home */
   object-fit: cover;
+  border-radius: 10px;
 }
+
 .card.product-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 0 20px #ffee91;
+  transform: scale(1.05) translateY(-8px);
+  box-shadow: 0 0 25px #e8cd33;
+  z-index: 5;
 }
+
+
+
 @media (max-width: 768px) {
   .wrap.catalog {
     padding: 60px 15px;

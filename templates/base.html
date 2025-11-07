@@ -154,15 +154,16 @@
 
 
     .footer-grid {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      flex-wrap: wrap;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 5%;
-      gap: 2rem;
-    }
+  display: flex;
+  justify-content: space-evenly; /* evenly distributes columns */
+  align-items: flex-start;
+  flex-wrap: nowrap; /* prevent last column from dropping down */
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 5%;
+  gap: 3rem; /* more space between columns */
+}
+
 
     .footer-col {
       flex: 1;
@@ -265,6 +266,25 @@
         border-radius: 6px;
       }
     }
+
+
+    html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden; /* removes horizontal scrollbar if any */
+}
+
+.site-header,
+.site-footer {
+  width: 100vw;     /* full viewport width */
+  margin: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+
   </style>
 </head>
 

@@ -1,16 +1,39 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, session, abort, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, session, jsonify
 from werkzeug.utils import secure_filename
+from werkzeug.security import check_password_hash
 from PIL import Image
 from config import Config
 from models import db, Product, BlogPost, SiteContent
 from flask_mail import Mail, Message
+from datetime import timedelta
+from functools import wraps
 
+# -------------------------
+# Allowed extensions
+# -------------------------
 ALLOWED_EXT = {'png', 'jpg', 'jpeg', 'gif'}
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.',1)[1].lower() in ALLOWED_EXT
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXT
 
+
+# -------------------------
+# Admin security decorator (moved outside create_app)
+# -------------------------
+def admin_required(fn):
+    @wraps(fn)
+    def wrapper(*a, **kw):
+        if session.get('admin_logged'):
+            return fn(*a, **kw)
+        flash('You must log in as admin to access that page.', 'warning')
+        return redirect(url_for('admin_login'))
+    return wrapper
+
+
+# -------------------------
+# Flask app factory
+# -------------------------
 def create_app():
     app = Flask(__name__, static_folder='static', template_folder='templates')
     app.config.from_object(Config)
@@ -19,45 +42,50 @@ def create_app():
     db.init_app(app)
     mail = Mail(app)
 
+    # Session lifetime
+    app.permanent_session_lifetime = timedelta(seconds=app.config['PERMANENT_SESSION_LIFETIME'])
+
+    # Initialize database and default content
     with app.app_context():
         db.create_all()
-        # seed minimal site content if missing
         if not SiteContent.query.filter_by(key='about').first():
-            c = SiteContent(key='about', value='Royal Radiance — handcrafted candles to light your moments. Edit this in admin.')
+            c = SiteContent(
+                key='about',
+                value='Royal Radiance — handcrafted candles to light your moments. Edit this in admin.'
+            )
             db.session.add(c)
             db.session.commit()
+
         if not SiteContent.query.filter_by(key='special_offer').first():
-            db.session.add(SiteContent(key='special_offer', value='Limited-time: Golden Autumn collection — 20% off!'))
+            db.session.add(
+                SiteContent(key='special_offer', value='Limited-time: Golden Autumn collection — 20% off!')
+            )
             db.session.commit()
 
-    # Home
+    # -------------------------
+    # Public routes
+    # -------------------------
     @app.route('/')
     def home():
         products = Product.query.order_by(Product.created_at.desc()).limit(6).all()
         special = SiteContent.query.filter_by(key='special_offer').first()
         return render_template('home.html', products=products, special=special.value if special else '')
 
-    # About
     @app.route('/about')
     def about():
         about = SiteContent.query.filter_by(key='about').first()
         return render_template('about.html', about_text=about.value if about else '')
 
-    # Catalog
     @app.route('/catalog')
     def catalog():
         products = Product.query.order_by(Product.created_at.desc()).all()
         return render_template('catalog.html', products=products)
 
-    # Single product API (optional)
     @app.route('/product/<int:pid>')
     def product_api(pid):
         p = Product.query.get_or_404(pid)
-        return jsonify({
-            'id': p.id,'name': p.name,'desc': p.short_desc,'price': p.price,'image': p.image
-        })
+        return jsonify({'id': p.id, 'name': p.name, 'desc': p.short_desc, 'price': p.price, 'image': p.image})
 
-    # Blog
     @app.route('/blog')
     def blog():
         posts = BlogPost.query.order_by(BlogPost.created_at.desc()).all()
@@ -68,18 +96,18 @@ def create_app():
         post = BlogPost.query.get_or_404(bid)
         return render_template('blog_post.html', post=post)
 
-    # Contact form
-    @app.route('/contact', methods=['GET','POST'])
+    @app.route('/contact', methods=['GET', 'POST'])
     def contact():
         if request.method == 'POST':
             name = request.form.get('name')
             email = request.form.get('email')
             msg = request.form.get('message')
-            # send mail to admin
             try:
-                message = Message(f'Royal Radiance contact from {name}', recipients=[app.config.get('MAIL_DEFAULT_SENDER')])
-                body = f'From: {name} <{email}>\n\n{msg}'
-                message.body = body
+                message = Message(
+                    f'Royal Radiance contact from {name}',
+                    recipients=[app.config.get('MAIL_DEFAULT_SENDER')]
+                )
+                message.body = f'From: {name} <{email}>\n\n{msg}'
                 mail.send(message)
                 flash('Message sent — we will contact you soon', 'success')
             except Exception as ex:
@@ -88,34 +116,46 @@ def create_app():
             return redirect(url_for('contact'))
         return render_template('contact.html')
 
-    # Static upload route (serve uploaded images)
     @app.route('/uploads/<path:filename>')
     def uploads(filename):
         return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-    # Admin (very basic password-protected)
-    def admin_required(fn):
-        from functools import wraps
-        @wraps(fn)
-        def wrapper(*a, **kw):
-            if session.get('admin_logged'):
-                return fn(*a, **kw)
-            return redirect(url_for('admin_login'))
-        return wrapper
-
-    @app.route('/admin/login', methods=['GET','POST'])
+    # -------------------------
+    # Admin routes
+    # -------------------------
+    @app.route('/admin/login', methods=['GET', 'POST'])
     def admin_login():
         if request.method == 'POST':
-            pwd = request.form.get('password')
-            if pwd == app.config.get('ADMIN_PASSWORD'):
+            pwd = request.form.get('password', '')
+            stored_hash = app.config.get('ADMIN_PASSWORD_HASH')
+
+        # Debug prints — to see if everything loads correctly
+            print("Loaded hash from config:", stored_hash)
+            print("Entered password:", pwd)
+
+            try:
+                is_valid = check_password_hash(stored_hash, pwd)
+            except Exception as e:
+                print("Hash check error:", e)
+                is_valid = False
+
+            print("Password match result:", is_valid)
+
+            if is_valid:
                 session['admin_logged'] = True
+                session.permanent = True
+                flash('Login successful!', 'success')
                 return redirect(url_for('admin_dashboard'))
-            flash('Wrong password', 'danger')
+            else:
+                flash('Wrong password', 'danger')
+
         return render_template('admin_login.html')
+
 
     @app.route('/admin/logout')
     def admin_logout():
         session.clear()
+        flash('You have been logged out.', 'info')
         return redirect(url_for('home'))
 
     @app.route('/admin')
@@ -125,8 +165,7 @@ def create_app():
         blogs = BlogPost.query.count()
         return render_template('admin_dashboard.html', products=products, blogs=blogs)
 
-    # Products management
-    @app.route('/admin/products', methods=['GET','POST'])
+    @app.route('/admin/products', methods=['GET', 'POST'])
     @admin_required
     def admin_products():
         if request.method == 'POST':
@@ -137,13 +176,12 @@ def create_app():
             filename = None
             if img and allowed_file(img.filename):
                 fname = secure_filename(img.filename)
-                filename = f"prod_{int(os.times().system*1000)}_{fname}"
+                filename = f"prod_{int(os.times().system * 1000)}_{fname}"
                 path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 img.save(path)
-                # resize
                 try:
                     im = Image.open(path)
-                    im.thumbnail((1200,1200))
+                    im.thumbnail((1200, 1200))
                     im.save(path, optimize=True, quality=85)
                 except Exception as ex:
                     print('resize fail', ex)
@@ -170,8 +208,7 @@ def create_app():
         flash('Product deleted', 'info')
         return redirect(url_for('admin_products'))
 
-    # Blogs management
-    @app.route('/admin/blogs', methods=['GET','POST'])
+    @app.route('/admin/blogs', methods=['GET', 'POST'])
     @admin_required
     def admin_blogs():
         if request.method == 'POST':
@@ -182,12 +219,12 @@ def create_app():
             filename = None
             if img and allowed_file(img.filename):
                 fname = secure_filename(img.filename)
-                filename = f"blog_{int(os.times().system*1000)}_{fname}"
+                filename = f"blog_{int(os.times().system * 1000)}_{fname}"
                 path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 img.save(path)
                 try:
                     im = Image.open(path)
-                    im.thumbnail((1400,900))
+                    im.thumbnail((1400, 900))
                     im.save(path, optimize=True, quality=80)
                 except:
                     pass
@@ -209,12 +246,12 @@ def create_app():
                 os.remove(os.path.join(app.config['UPLOAD_FOLDER'], b.image))
             except:
                 pass
-        db.session.delete(b); db.session.commit()
+        db.session.delete(b)
+        db.session.commit()
         flash('Blog deleted', 'info')
         return redirect(url_for('admin_blogs'))
 
-    # Edit site content (about, offers)
-    @app.route('/admin/edit/<key>', methods=['GET','POST'])
+    @app.route('/admin/edit/<key>', methods=['GET', 'POST'])
     @admin_required
     def admin_edit(key):
         item = SiteContent.query.filter_by(key=key).first_or_404()
@@ -225,13 +262,16 @@ def create_app():
             return redirect(url_for('admin_dashboard'))
         return render_template('admin_edit.html', item=item)
 
-    # simple 404
     @app.errorhandler(404)
     def page_not_found(e):
         return render_template('404.html'), 404
 
     return app
 
+
+# -------------------------
+# Run app
+# -------------------------
 app = create_app()
 
 if __name__ == "__main__":
