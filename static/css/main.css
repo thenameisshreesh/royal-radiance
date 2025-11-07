@@ -238,3 +238,16 @@ body.theme {
 .card.product-card * {
   font-family: "c_gothic", sans-serif !important;
 }
+.card.product-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.card-media img {
+  width: 100%;
+  height: 300px;       /* adjust this to match your card content height */
+  object-fit: cover;   /* keeps aspect ratio, fills the space */
+  border-radius: 10px;
+}

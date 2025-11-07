@@ -107,7 +107,7 @@ def create_app():
                     f'Royal Radiance contact from {name}',
                     recipients=[app.config.get('MAIL_DEFAULT_SENDER')]
                 )
-                message.body = f'From: {name} <{email}>\n\n{msg}'
+                message.body = f'From: {name} \nEmail: <{email}>\n\n{msg}'
                 mail.send(message)
                 flash('Message sent — we will contact you soon', 'success')
             except Exception as ex:
