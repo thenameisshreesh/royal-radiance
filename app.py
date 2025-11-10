@@ -304,6 +304,7 @@ def create_app():
             return redirect(url_for('admin_dashboard'))
         return render_template('admin_edit.html', item=item)
 
+
     @app.errorhandler(404)
     def page_not_found(e):
         return render_template('404.html'), 404
