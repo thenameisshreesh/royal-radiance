@@ -74,10 +74,10 @@ def create_app():
    
     @app.route('/about')
     def about():
-        item = SiteContent.query.filter_by(key='about').first()
-        about_text = item.value if item else "Royal Radiance — handcrafted candles to light your moments."
+    # Fetch content from database
+        content = SiteContent.query.filter_by(key='about').first()
+        about_text = content.value if content else "Royal Radiance — handcrafted candles to light your moments."
         return render_template('about.html', about_text=about_text)
-
 
 
     @app.route('/catalog')
@@ -300,21 +300,26 @@ def create_app():
     @app.route('/admin/edit/<key>', methods=['GET', 'POST'])
     @admin_required
     def admin_edit(key):
-        item = SiteContent.query.filter_by(key=key).first()
-        if request.method == 'POST':
-            value = request.form.get('value', '')
-        if not item:
-            item = SiteContent(key=key, value=value)
-            db.session.add(item)
-        else:
-            item.value = value
-            db.session.commit()
-            flash('Saved successfully!', 'success')
-            return redirect(url_for('admin_dashboard'))
+        try:
+        # Get or create content in DB
+            content = SiteContent.query.filter_by(key=key).first()
+            if not content:
+                content = SiteContent(key=key, value='')
+                db.session.add(content)
+                db.session.commit()
 
-        value = item.value if item else ''
-        return render_template('admin_edit.html', item={'key': key, 'value': value})
+            if request.method == 'POST':
+                new_value = request.form.get('value', '')
+                content.value = new_value
+                db.session.commit()
+                flash('Saved successfully!', 'success')
+                return redirect(url_for('admin_dashboard'))
 
+            return render_template('admin_edit.html', item={'key': key, 'value': content.value})
+
+        except Exception as e:
+            print("Error in admin_edit:", e)
+            return f"Error: {e}", 500
 
 
 # -------------------------
