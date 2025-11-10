@@ -12,7 +12,6 @@ class Config:
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # Flask-Mail config...
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
     MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'True') == 'True'
@@ -26,24 +25,12 @@ class Config:
     )
 
     PERMANENT_SESSION_LIFETIME = 1800
-    MAX_CONTENT_LENGTH = 4 * 1024 * 1024  # 4MB
 
-    # ------------------------
-    # Hybrid writable folder
-    # ------------------------
-    # 1. Try environment variable
-    upload_folder = os.environ.get('UPLOAD_FOLDER')
-    if upload_folder:
-        UPLOAD_FOLDER = upload_folder
+    # Hybrid upload folder
+    if os.environ.get('IS_SERVERLESS', '0') == '1':
+        UPLOAD_FOLDER = '/tmp/uploads'
     else:
-        # 2. Locally writable static folder
-        local_folder = os.path.join(BASE_DIR, 'static', 'uploads')
-        try:
-            os.makedirs(local_folder, exist_ok=True)
-            UPLOAD_FOLDER = local_folder
-        except PermissionError:
-            # 3. Fallback for read-only FS (serverless)
-            tmp_folder = '/tmp/uploads'
-            os.makedirs(tmp_folder, exist_ok=True)
-            UPLOAD_FOLDER = tmp_folder
+        UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
 
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    MAX_CONTENT_LENGTH = 4 * 1024 * 1024  # 4MB

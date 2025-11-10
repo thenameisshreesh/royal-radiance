@@ -301,13 +301,12 @@ def create_app():
         return redirect(url_for('admin_blogs'))
 
     @app.route('/admin/edit/<key>', methods=['GET', 'POST'])
-    @admin_required 
+    @admin_required
     def admin_edit(key):
         try:
-        # File path based on key
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{key}.txt")
+            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)  # ensure folder exists
 
-        # If POST, save content to file
             if request.method == 'POST':
                 content = request.form.get('value', '')
                 with open(file_path, 'w', encoding='utf-8') as f:
@@ -315,18 +314,18 @@ def create_app():
                 flash('Saved to file successfully!', 'success')
                 return redirect(url_for('admin_dashboard'))
 
-        # If GET, read content from file (if exists)
             if os.path.exists(file_path):
                 with open(file_path, 'r', encoding='utf-8') as f:
                     content = f.read()
             else:
-                content = ''
+                content = ''  # default empty if file not found
 
             return render_template('admin_edit.html', item={'key': key, 'value': content})
 
         except Exception as e:
             print("Error in admin_edit:", e)
             return f"Error: {e}", 500
+
 
 
     @app.errorhandler(404)
