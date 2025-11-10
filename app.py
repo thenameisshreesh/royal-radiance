@@ -35,6 +35,9 @@ def admin_required(fn):
 # Flask app factory
 # -------------------------
 
+
+
+
 def create_app():
     app = Flask(__name__, static_folder='static', template_folder='templates')
     app.config.from_object(Config)
@@ -71,14 +74,17 @@ def create_app():
                 db.session.add(SiteContent(key=key, value=value))
         db.session.commit()
 
-    # -------------------------
-    # Public & admin routes
-    # -------------------------
-    # (keep all your routes as-is)
+    
+        return app
 
 
+    @app.route('/')
+    def home():
+        products = Product.query.order_by(Product.created_at.desc()).limit(6).all()
+        special = SiteContent.query.filter_by(key='special_offer').first()
+        return render_template('home.html', products=products, special=special.value if special else '')
 
-
+   
     @app.route('/about')
     def about():
     # Fetch content from database
@@ -307,26 +313,21 @@ def create_app():
     @app.route('/admin/edit/<key>', methods=['GET', 'POST'])
     @admin_required
     def admin_edit(key):
-        try:
-        # Get or create content in DB
-            content = SiteContent.query.filter_by(key=key).first()
-            if not content:
-                content = SiteContent(key=key, value='')
-                db.session.add(content)
-                db.session.commit()
+        item = SiteContent.query.filter_by(key=key).first()
+        if request.method == 'POST':
+            value = request.form.get('value', '')
+        if not item:
+            item = SiteContent(key=key, value=value)
+            db.session.add(item)
+        else:
+            item.value = value
+            db.session.commit()
+            flash('Saved successfully!', 'success')
+            return redirect(url_for('admin_dashboard'))
 
-            if request.method == 'POST':
-                new_value = request.form.get('value', '')
-                content.value = new_value
-                db.session.commit()
-                flash('Saved successfully!', 'success')
-                return redirect(url_for('admin_dashboard'))
+        value = item.value if item else ''
+        return render_template('admin_edit.html', item={'key': key, 'value': value})
 
-            return render_template('admin_edit.html', item={'key': key, 'value': content.value})
-
-        except Exception as e:
-            print("Error in admin_edit:", e)
-        return f"Error: {e}", 500
 
 
 # -------------------------
