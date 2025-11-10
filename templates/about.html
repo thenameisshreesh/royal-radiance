@@ -56,7 +56,9 @@ body, html {
 
 </style>
 
-<img src="{{ url_for('static', filename='images/cg.gif') }}" class="video-bg" alt="background">
+<video class="video-bg" autoplay muted loop playsinline>
+  <source src="{{ url_for('static', filename='images/cg.mp4') }}" type="video/mp4">
+</video>
 <div class="video-overlay"></div>
 
 <section class="wrap about">

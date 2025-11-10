@@ -296,13 +296,17 @@ def create_app():
     @app.route('/admin/edit/<key>', methods=['GET', 'POST'])
     @admin_required
     def admin_edit(key):
-        item = SiteContent.query.filter_by(key=key).first_or_404()
-        if request.method == 'POST':
-            item.value = request.form.get('value')
-            db.session.commit()
-            flash('Saved', 'success')
-            return redirect(url_for('admin_dashboard'))
-        return render_template('admin_edit.html', item=item)
+        try:
+            item = SiteContent.query.filter_by(key=key).first_or_404()
+            if request.method == 'POST':
+                item.value = request.form.get('value')
+                db.session.commit()
+                flash('Saved', 'success')
+                return redirect(url_for('admin_dashboard'))
+            return render_template('admin_edit.html', item=item)
+        except Exception as e:
+            print("Error in admin_edit:", e)
+            return f"Error: {e}", 500
 
 
     @app.errorhandler(404)
