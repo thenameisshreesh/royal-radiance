@@ -34,27 +34,10 @@ def admin_required(fn):
 # -------------------------
 # Flask app factory
 # -------------------------
-
-
-
-
 def create_app():
     app = Flask(__name__, static_folder='static', template_folder='templates')
     app.config.from_object(Config)
-
-    # Ensure upload folder exists (works on serverless too)
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-
-    # Serverless DB fallback
-    if os.environ.get('IS_SERVERLESS', '0') == '1':
-        tmp_db = '/tmp/data.sqlite'
-        if not os.path.exists(tmp_db):
-            # Copy local DB if it exists
-            local_db = os.path.join(app.root_path, 'instance', 'data.sqlite')
-            if os.path.exists(local_db):
-                import shutil
-                shutil.copy(local_db, tmp_db)
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + tmp_db
 
     db.init_app(app)
     mail = Mail(app)
@@ -62,36 +45,36 @@ def create_app():
     # Session lifetime
     app.permanent_session_lifetime = timedelta(seconds=app.config['PERMANENT_SESSION_LIFETIME'])
 
-    # Initialize DB & defaults safely
+    # Initialize database and default content
     with app.app_context():
         db.create_all()
-        defaults = {
-            'about': 'Royal Radiance — handcrafted candles to light your moments. Edit this in admin.',
-            'special_offer': 'Limited-time: Golden Autumn collection — 20% off!'
-        }
-        for key, value in defaults.items():
-            if not SiteContent.query.filter_by(key=key).first():
-                db.session.add(SiteContent(key=key, value=value))
-        db.session.commit()
+        if not SiteContent.query.filter_by(key='about').first():
+            c = SiteContent(
+                key='about',
+                value='Royal Radiance — handcrafted candles to light your moments. Edit this in admin.'
+            )
+            db.session.add(c)
+            db.session.commit()
 
-    
-        return app
+        if not SiteContent.query.filter_by(key='special_offer').first():
+            db.session.add(
+                SiteContent(key='special_offer', value='Limited-time: Golden Autumn collection — 20% off!')
+            )
+            db.session.commit()
 
-
+    # -------------------------
+    # Public routes
+    # -------------------------
     @app.route('/')
     def home():
         products = Product.query.order_by(Product.created_at.desc()).limit(6).all()
         special = SiteContent.query.filter_by(key='special_offer').first()
         return render_template('home.html', products=products, special=special.value if special else '')
 
-   
     @app.route('/about')
     def about():
-    # Fetch content from database
-        content = SiteContent.query.filter_by(key='about').first()
-        about_text = content.value if content else "Royal Radiance — handcrafted candles to light your moments."
-        return render_template('about.html', about_text=about_text)
-
+        about = SiteContent.query.filter_by(key='about').first()
+        return render_template('about.html', about_text=about.value if about else '')
 
     @app.route('/catalog')
     def catalog():
@@ -313,21 +296,24 @@ def create_app():
     @app.route('/admin/edit/<key>', methods=['GET', 'POST'])
     @admin_required
     def admin_edit(key):
-        item = SiteContent.query.filter_by(key=key).first()
-        if request.method == 'POST':
-            value = request.form.get('value', '')
-        if not item:
-            item = SiteContent(key=key, value=value)
-            db.session.add(item)
-        else:
-            item.value = value
-            db.session.commit()
-            flash('Saved successfully!', 'success')
-            return redirect(url_for('admin_dashboard'))
+        try:
+            item = SiteContent.query.filter_by(key=key).first_or_404()
+            if request.method == 'POST':
+                item.value = request.form.get('value')
+                db.session.commit()
+                flash('Saved', 'success')
+                return redirect(url_for('admin_dashboard'))
+            return render_template('admin_edit.html', item=item)
+        except Exception as e:
+            print("Error in admin_edit:", e)
+            return f"Error: {e}", 500
 
-        value = item.value if item else ''
-        return render_template('admin_edit.html', item={'key': key, 'value': value})
 
+    @app.errorhandler(404)
+    def page_not_found(e):
+        return render_template('404.html'), 404
+
+    return app
 
 
 # -------------------------
