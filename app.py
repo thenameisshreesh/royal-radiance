@@ -37,7 +37,21 @@ def admin_required(fn):
 def create_app():
     app = Flask(__name__, static_folder='static', template_folder='templates')
     app.config.from_object(Config)
+
+    # Ensure upload folder exists
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+    # ----------------------
+    # Serverless DB fallback
+    # ----------------------
+    if os.environ.get('IS_SERVERLESS', '0') == '1':
+        tmp_db = '/tmp/data.sqlite'
+        if not os.path.exists(tmp_db):
+            local_db = os.path.join(app.root_path, 'instance', 'data.sqlite')
+            if os.path.exists(local_db):
+                import shutil
+                shutil.copy(local_db, tmp_db)
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + tmp_db
 
     db.init_app(app)
     mail = Mail(app)
@@ -45,22 +59,21 @@ def create_app():
     # Session lifetime
     app.permanent_session_lifetime = timedelta(seconds=app.config['PERMANENT_SESSION_LIFETIME'])
 
+    # ----------------------
     # Initialize database and default content
+    # ----------------------
     with app.app_context():
         db.create_all()
-        if not SiteContent.query.filter_by(key='about').first():
-            c = SiteContent(
-                key='about',
-                value='Royal Radiance — handcrafted candles to light your moments. Edit this in admin.'
-            )
-            db.session.add(c)
-            db.session.commit()
 
-        if not SiteContent.query.filter_by(key='special_offer').first():
-            db.session.add(
-                SiteContent(key='special_offer', value='Limited-time: Golden Autumn collection — 20% off!')
-            )
-            db.session.commit()
+        # Safer default content insertion (commit once)
+        defaults = {
+            'about': 'Royal Radiance — handcrafted candles to light your moments. Edit this in admin.',
+            'special_offer': 'Limited-time: Golden Autumn collection — 20% off!'
+        }
+        for key, value in defaults.items():
+            if not SiteContent.query.filter_by(key=key).first():
+                db.session.add(SiteContent(key=key, value=value))
+        db.session.commit()
 
     # -------------------------
     # Public routes
@@ -319,7 +332,7 @@ def create_app():
 
         except Exception as e:
             print("Error in admin_edit:", e)
-            return f"Error: {e}", 500
+        return f"Error: {e}", 500
 
 
 # -------------------------
