@@ -74,13 +74,10 @@ def create_app():
    
     @app.route('/about')
     def about():
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'about.txt')
-        if os.path.exists(file_path):
-            with open(file_path, 'r', encoding='utf-8') as f:
-                about_text = f.read()
-        else:
-            about_text = "Royal Radiance — handcrafted candles to light your moments."
+        item = SiteContent.query.filter_by(key='about').first()
+        about_text = item.value if item else "Royal Radiance — handcrafted candles to light your moments."
         return render_template('about.html', about_text=about_text)
+
 
 
     @app.route('/catalog')
@@ -303,29 +300,20 @@ def create_app():
     @app.route('/admin/edit/<key>', methods=['GET', 'POST'])
     @admin_required
     def admin_edit(key):
-        try:
-        # always use the configured UPLOAD_FOLDER
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{key}.txt")
-            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)  # ensure folder exists
+        item = SiteContent.query.filter_by(key=key).first()
+        if request.method == 'POST':
+            value = request.form.get('value', '')
+        if not item:
+            item = SiteContent(key=key, value=value)
+            db.session.add(item)
+        else:
+            item.value = value
+            db.session.commit()
+            flash('Saved successfully!', 'success')
+            return redirect(url_for('admin_dashboard'))
 
-            if request.method == 'POST':
-                content = request.form.get('value', '')
-                with open(file_path, 'w', encoding='utf-8') as f:
-                    f.write(content)
-                flash('Saved to file successfully!', 'success')
-                return redirect(url_for('admin_dashboard'))
-
-            if os.path.exists(file_path):
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-            else:
-                content = ''  # default empty
-
-            return render_template('admin_edit.html', item={'key': key, 'value': content})
-
-        except Exception as e:
-            print("Error in admin_edit:", e)
-            return f"Error: {e}", 500
+        value = item.value if item else ''
+        return render_template('admin_edit.html', item={'key': key, 'value': value})
 
 
 
