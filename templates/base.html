@@ -284,11 +284,21 @@
   padding-right: 0;
 }
 
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* full viewport height */
+}
+
+main {
+  flex: 1; /* main content grows to push footer down */
+}
 
   </style>
 </head>
 
 <body class="theme-blue-black">
+  <div class="page-wrapper">
   <header class="site-header">
     <div class="wrap header-wrap">
       <a href="{{ url_for('home') }}" class="logo">
@@ -367,6 +377,7 @@
       &copy; 2025 Royal Radiance. All rights reserved.
     </div>
   </footer>
+  </div>
 
   <!-- Mobile Dropdown Toggle Script -->
   <script>
