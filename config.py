@@ -6,10 +6,13 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'replace-this-secret')
+    
     SQLALCHEMY_DATABASE_URI = os.environ.get(
-        'DATABASE_URL',
-        'sqlite:///' + os.path.join(BASE_DIR, 'data.sqlite')
+    'DATABASE_URL',
+    'sqlite:///' + os.path.join(BASE_DIR, 'instance', 'data.sqlite')
     )
+
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Flask-Mail (fill with real values in .env for production)
