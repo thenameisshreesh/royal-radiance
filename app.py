@@ -71,10 +71,17 @@ def create_app():
         special = SiteContent.query.filter_by(key='special_offer').first()
         return render_template('home.html', products=products, special=special.value if special else '')
 
+   
     @app.route('/about')
     def about():
-        about = SiteContent.query.filter_by(key='about').first()
-        return render_template('about.html', about_text=about.value if about else '')
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'about.txt')
+        if os.path.exists(file_path):
+            with open(file_path, 'r', encoding='utf-8') as f:
+                about_text = f.read()
+        else:
+            about_text = "Royal Radiance — handcrafted candles to light your moments."
+        return render_template('about.html', about_text=about_text)
+
 
     @app.route('/catalog')
     def catalog():
@@ -294,16 +301,29 @@ def create_app():
         return redirect(url_for('admin_blogs'))
 
     @app.route('/admin/edit/<key>', methods=['GET', 'POST'])
-    @admin_required
+    @admin_required 
     def admin_edit(key):
         try:
-            item = SiteContent.query.filter_by(key=key).first_or_404()
+        # File path based on key
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{key}.txt")
+
+        # If POST, save content to file
             if request.method == 'POST':
-                item.value = request.form.get('value')
-                db.session.commit()
-                flash('Saved', 'success')
+                content = request.form.get('value', '')
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.write(content)
+                flash('Saved to file successfully!', 'success')
                 return redirect(url_for('admin_dashboard'))
-            return render_template('admin_edit.html', item=item)
+
+        # If GET, read content from file (if exists)
+            if os.path.exists(file_path):
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+            else:
+                content = ''
+
+            return render_template('admin_edit.html', item={'key': key, 'value': content})
+
         except Exception as e:
             print("Error in admin_edit:", e)
             return f"Error: {e}", 500
