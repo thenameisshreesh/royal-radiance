@@ -304,6 +304,7 @@ def create_app():
     @admin_required
     def admin_edit(key):
         try:
+        # always use the configured UPLOAD_FOLDER
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{key}.txt")
             os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)  # ensure folder exists
 
@@ -318,7 +319,7 @@ def create_app():
                 with open(file_path, 'r', encoding='utf-8') as f:
                     content = f.read()
             else:
-                content = ''  # default empty if file not found
+                content = ''  # default empty
 
             return render_template('admin_edit.html', item={'key': key, 'value': content})
 
@@ -326,13 +327,6 @@ def create_app():
             print("Error in admin_edit:", e)
             return f"Error: {e}", 500
 
-
-
-    @app.errorhandler(404)
-    def page_not_found(e):
-        return render_template('404.html'), 404
-
-    return app
 
 
 # -------------------------
