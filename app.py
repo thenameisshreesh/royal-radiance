@@ -199,5 +199,9 @@ def create_app():
 
 
 app = create_app()
-if __name__ == "__main__":
-    app.run(debug=True)
+# vercel entry point
+app = Flask(__name__)
+
+# your routes here...
+
+# don't call app.run()
