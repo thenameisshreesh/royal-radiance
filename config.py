@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
+# Your Supabase project settings (you already provided these in your repo)
 SUPABASE_URL = "https://cvnuwppsgrhzvmlfxxzb.supabase.co"
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2bnV3cHBzZ3JoenZtbGZ4eHpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI3Nzg3NjEsImV4cCI6MjA3ODM1NDc2MX0.7IhHKZdeIOLUScF4ui2xhSSxlok1FZVdQoUOtXAcaZA"
 
@@ -16,6 +17,7 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'replace-this-secret')
 
+    # Flask-Mail (fill these in env for real email)
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
     MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'True') == 'True'
@@ -29,5 +31,6 @@ class Config:
     )
 
     PERMANENT_SESSION_LIFETIME = 1800
+    # Local upload path (will work locally). On Vercel this is ephemeral — code handles save errors.
     UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
-    MAX_CONTENT_LENGTH = 4 * 1024 * 1024
+    MAX_CONTENT_LENGTH = 4 * 1024 * 1024  # 4MB
