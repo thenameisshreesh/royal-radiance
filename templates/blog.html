@@ -2,6 +2,24 @@
 {% block title %}Blog{% endblock %}
 {% block content %}
 <style>
+
+/* ===== C_GOTHIC FONT ===== */
+@font-face {
+  font-family: 'C_Gothic';
+  src: url("{{ url_for('static', filename='fonts/C_Gothic.ttf') }}") format('truetype');
+}
+
+/* Apply font to blog content */
+.wrap.blog-list,
+.blog-card,
+.card-body,
+h2,
+h3,
+.read-more {
+  font-family: 'C_Gothic', sans-serif;
+}
+
+
 body, html {
   margin: 0;
   padding: 0;

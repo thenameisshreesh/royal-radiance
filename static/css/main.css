@@ -66,7 +66,7 @@ body.theme {
 }
 .hero-inner { display: flex; gap: 2rem; align-items: center; }
 .hero-title {
-  font-family: "Great Vibes", cursive;
+  
   font-size: 4rem;
   margin: 0;
   color: var(--brown);
@@ -95,7 +95,10 @@ body.theme {
   transform: translateY(-4px);
   box-shadow: 0 18px 40px rgba(255,200,120,0.28);
 }
-.btn.ghost { background: transparent; border: 1px solid rgba(62,39,35,0.08); }
+.btn.ghost { 
+  font-family: 'C_Gothic', sans-serif;
+
+  background: transparent; border: 1px solid rgba(62,39,35,0.08); }
 .btn-small {
   background: var(--black);
   padding: .4rem .75rem;

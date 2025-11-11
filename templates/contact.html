@@ -2,6 +2,26 @@
 {% block title %}Contact{% endblock %}
 {% block content %}
 <style>
+
+
+/* ===== C_GOTHIC FONT ===== */
+@font-face {
+  font-family: 'C_Gothic';
+  src: url("{{ url_for('static', filename='fonts/C_Gothic.ttf') }}") format('truetype');
+}
+
+/* Apply font to contact page content */
+.wrap.contact,
+.contact-details,
+.contact-form,
+h2,
+p,
+label,
+button {
+  font-family: 'C_Gothic', sans-serif;
+}
+
+
 body, html {
   margin: 0;
   padding: 0;
