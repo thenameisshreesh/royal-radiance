@@ -1,7 +1,6 @@
 import requests
 import json
 from config import SUPABASE_URL, SUPABASE_KEY, HEADERS, SUPABASE_STORAGE_URL, SUPABASE_BUCKET
-import os
 
 # ---------- PRODUCTS ----------
 def get_all_products():
@@ -15,7 +14,6 @@ def get_all_products():
 def add_product(name, short_desc, price, image):
     """
     image is expected to be a full URL (public URL) or filename (legacy).
-    We just store whatever is provided.
     """
     data = {"name": name, "short_desc": short_desc, "price": price, "image": image}
     try:
@@ -97,14 +95,13 @@ def update_site_content(key, value):
 def upload_to_supabase_storage(file_obj, filename):
     """Upload file to Supabase Storage bucket and return public URL."""
     try:
-        # Upload via Supabase Storage REST API
         url = f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET}/{filename}"
         headers = {
             "Authorization": f"Bearer {SUPABASE_KEY}",
             "apikey": SUPABASE_KEY,
-            "Content-Type": file_obj.mimetype
         }
-        res = requests.post(url, headers=headers, data=file_obj.read())
+        files = {"file": (filename, file_obj.stream, file_obj.mimetype)}
+        res = requests.post(url, headers=headers, files=files)
         if res.status_code in (200, 201):
             return f"{SUPABASE_STORAGE_URL}/{filename}"
         else:
@@ -115,9 +112,5 @@ def upload_to_supabase_storage(file_obj, filename):
         return None
 
 def public_url_for(path_in_bucket: str) -> str:
-    """
-    Return public URL for an object in the bucket.
-    Example: if bucket='uploads' and path_in_bucket='prod_img.jpg',
-    public URL = {SUPABASE_URL}/storage/v1/object/public/uploads/prod_img.jpg
-    """
-    return f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/{path_in_bucket}"
+    """Return public URL for object in bucket."""
+    return f"{SUPABASE_STORAGE_URL}/{path_in_bucket}"
