@@ -56,7 +56,7 @@ def create_app():
     @app.route('/uploads/<path:filename>')
     def uploads(filename):
         # Serve files from UPLOAD_FOLDER if exists, else 404
-        folder = app.config.get('UPLOAD_FOLDER')
+        folder = app.config.get('UPLOAD_STATIC')
         if folder and os.path.exists(os.path.join(folder, filename)):
             return send_from_directory(folder, filename)
         # Not found (on Vercel might be ephemeral), return 404
