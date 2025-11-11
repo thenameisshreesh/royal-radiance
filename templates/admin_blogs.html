@@ -17,7 +17,8 @@
     {% for b in posts %}
       <div class="card">
         {% if b.image %}
-          <img src="{{ url_for('uploads', filename=b.image) }}">
+          <!-- ✅ Fixed: serve from static/uploads -->
+          <img src="{{ url_for('static', filename='uploads/' + b.image) }}">
         {% endif %}
         <div class="card-body">
           <h4>{{ b.title }}</h4>

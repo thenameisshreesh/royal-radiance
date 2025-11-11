@@ -37,6 +37,9 @@ def create_app():
         # if creation fails on readonly FS, keep going (we handle save errors later)
         print("⚠️ Could not create upload folder:", e)
 
+    UPLOAD_STATIC = os.path.join(app.static_folder, 'uploads')
+    os.makedirs(UPLOAD_STATIC, exist_ok=True)
+    
     mail = Mail(app)
     app.permanent_session_lifetime = timedelta(seconds=app.config['PERMANENT_SESSION_LIFETIME'])
 

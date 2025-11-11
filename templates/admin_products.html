@@ -17,7 +17,7 @@
   <div class="grid products-grid">
     {% for p in products %}
       <div class="card">
-       <img src="{{ url_for('static', filename='images/uploads/' + p.image) }}" alt="{{ p.name }}"onerror="this.src='{{ url_for('static', filename='images/item (0).jpg') }}'">
+       <img src="{{ url_for('static', filename='uploads/' + p.image) }}" alt="{{ p.name }}">
 <div class="card-body">
           <h4>{{ p.name }} — ${{ "%.2f"|format(p.price) }}</h4>
           <form method="post" action="{{ url_for('admin_products_delete', pid=p.id) }}" onsubmit="return confirm('Delete?');">
