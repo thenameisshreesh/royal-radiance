@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-# Your Supabase project settings (you already provided these in your repo)
+# Your Supabase project settings
 SUPABASE_URL = "https://cvnuwppsgrhzvmlfxxzb.supabase.co"
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2bnV3cHBzZ3JoenZtbGZ4eHpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI3Nzg3NjEsImV4cCI6MjA3ODM1NDc2MX0.7IhHKZdeIOLUScF4ui2xhSSxlok1FZVdQoUOtXAcaZA"
 
@@ -13,6 +13,9 @@ HEADERS = {
 }
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+
+# bucket name you created in Supabase storage:
+SUPABASE_BUCKET = os.environ.get('SUPABASE_BUCKET', 'uploads')
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'replace-this-secret')
