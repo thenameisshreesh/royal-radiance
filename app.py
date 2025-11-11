@@ -199,9 +199,3 @@ def create_app():
 
 
 app = create_app()
-# vercel entry point
-app = Flask(__name__)
-
-# your routes here...
-
-# don't call app.run()
