@@ -157,24 +157,6 @@ def create_app():
         blogs = get_all_blogs() or []
         return render_template('admin_dashboard.html', products=len(products), blogs=len(blogs))
 
-    
-
-
-
-    @app.route('/admin/products/delete/<int:pid>', methods=['POST'])
-    @admin_required
-    def admin_products_delete(pid):
-        ok = delete_product(pid)
-        if not ok:
-            flash('Could not delete product — check logs.', 'warning')
-        else:
-            flash('Product deleted.', 'info')
-        return redirect(url_for('admin_products'))
-
-    
-
-
-
     @app.route('/admin/products', methods=['GET', 'POST'])
     @admin_required
     def admin_products():
@@ -187,23 +169,34 @@ def create_app():
                 price = 0.0
 
             img = request.files.get('image')
-            public_url = None
+            stored_image_value = None
             if img and allowed_file(img.filename):
-                from supabase_db import upload_to_supabase_storage
                 fname = secure_filename(img.filename)
+                # choose a unique path in bucket (optional): prefix with products + timestamp or uuid
                 filename = f"prod_{fname}"
+                from supabase_db import upload_to_supabase_storage
                 public_url = upload_to_supabase_storage(img, filename)
-
+            else:
+                public_url=None
+            # Insert product row (image is URL or filename)
             ok = add_product(name, desc, price, public_url)
             if not ok:
                 flash('Could not add product to database — check logs.', 'warning')
             else:
                 flash('Product added!', 'success')
             return redirect(url_for('admin_products'))
-
         products = get_all_products() or []
         return render_template('admin_products.html', products=products)
 
+    @app.route('/admin/products/delete/<int:pid>', methods=['POST'])
+    @admin_required
+    def admin_products_delete(pid):
+        ok = delete_product(pid)
+        if not ok:
+            flash('Could not delete product — check logs.', 'warning')
+        else:
+            flash('Product deleted.', 'info')
+        return redirect(url_for('admin_products'))
 
     @app.route('/admin/blogs', methods=['GET', 'POST'])
     @admin_required
@@ -214,12 +207,14 @@ def create_app():
             content = request.form.get('content')
 
             img = request.files.get('image')
-            public_url = None
+            stored_image_value = None
             if img and allowed_file(img.filename):
-                from supabase_db import upload_to_supabase_storage
                 fname = secure_filename(img.filename)
                 filename = f"blog_{fname}"
+                from supabase_db import upload_to_supabase_storage
                 public_url = upload_to_supabase_storage(img, filename)
+            else:
+                public_url = None
 
             ok = add_blog(title, excerpt, content, public_url)
             if not ok:
@@ -227,12 +222,8 @@ def create_app():
             else:
                 flash('Blog added!', 'success')
             return redirect(url_for('admin_blogs'))
-
         posts = get_all_blogs() or []
         return render_template('admin_blogs.html', posts=posts)
-
-
-
 
     @app.route('/admin/blogs/delete/<int:bid>', methods=['POST'])
     @admin_required
