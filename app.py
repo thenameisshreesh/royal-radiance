@@ -39,6 +39,9 @@ def create_app():
 
     UPLOAD_STATIC = os.path.join(app.static_folder, 'uploads')
     os.makedirs(UPLOAD_STATIC, exist_ok=True)
+    app.config['UPLOAD_FOLDER'] = UPLOAD_STATIC
+    app.config['UPLOAD_STATIC'] = UPLOAD_STATIC
+
     
     mail = Mail(app)
     app.permanent_session_lifetime = timedelta(seconds=app.config['PERMANENT_SESSION_LIFETIME'])
