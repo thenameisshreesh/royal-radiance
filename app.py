@@ -7,8 +7,7 @@ from config import Config
 from supabase_db import (
     get_all_products, add_product, delete_product,
     get_all_blogs, add_blog, delete_blog,
-    get_site_content, update_site_content, add_site_content,
-    upload_bytes_to_supabase, public_url_for
+    get_site_content, update_site_content, add_site_content, public_url_for
 )
 from flask_mail import Mail, Message
 from datetime import timedelta

@@ -91,7 +91,7 @@ body, html {
       <article class="card blog-card">
         <a href="{{ url_for('blog_post', bid=post.id) }}">
           {% if post.image %}
-            <img src="{{ url_for('https://cvnuwppsgrhzvmlfxxzb.supabase.co/storage/v1/object/public/{SUPABASE_BUCKET}' ~ post.image) }}" alt="{{ post.title }}">
+            <img src="{{ post.image }}" alt="{{ post.title }}">
           {% else %}
             <img src="{{ url_for('static', filename='images/sample_blog.jpg') }}" alt="blog">
           {% endif %}
