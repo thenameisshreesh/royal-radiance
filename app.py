@@ -7,12 +7,11 @@ from config import Config
 from supabase_db import (
     get_all_products, add_product, delete_product,
     get_all_blogs, add_blog, delete_blog,
-    get_site_content, update_site_content, add_site_content, public_url_for
+    get_site_content, update_site_content, add_site_content
 )
 from flask_mail import Mail, Message
 from datetime import timedelta
 from functools import wraps
-import mimetypes
 
 ALLOWED_EXT = {'png', 'jpg', 'jpeg', 'gif'}
 
@@ -31,24 +30,23 @@ def admin_required(fn):
 def create_app():
     app = Flask(__name__, static_folder='static', template_folder='templates')
     app.config.from_object(Config)
-
-    # ensure local upload folder exists for local testing (optional)
+    # ensure upload folder exists locally
     try:
         os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     except Exception as e:
-        print("⚠️ Could not create local upload folder:", e)
+        # if creation fails on readonly FS, keep going (we handle save errors later)
+        print("⚠️ Could not create upload folder:", e)
 
-    # Also ensure static/uploads exists (used for legacy local serving)
     UPLOAD_STATIC = os.path.join(app.static_folder, 'uploads')
     os.makedirs(UPLOAD_STATIC, exist_ok=True)
-    app.config['UPLOAD_STATIC'] = UPLOAD_STATIC
-    # keep UPLOAD_FOLDER pointing to static/uploads for local fallback (not used for Supabase uploads)
     app.config['UPLOAD_FOLDER'] = UPLOAD_STATIC
+    app.config['UPLOAD_STATIC'] = UPLOAD_STATIC
 
+    
     mail = Mail(app)
     app.permanent_session_lifetime = timedelta(seconds=app.config['PERMANENT_SESSION_LIFETIME'])
 
-    # Ensure default site content exists
+    # Ensure default site content exists (previously done by SQLAlchemy)
     try:
         if get_site_content('about') is None:
             add_site_content('about', 'Royal Radiance — handcrafted candles to light your moments. Edit this in admin.')
@@ -57,22 +55,25 @@ def create_app():
     except Exception as e:
         print("⚠️ Could not ensure default site content:", e)
 
-    # route to serve uploaded files locally (templates may never need this when using Supabase URLs)
+    # route to serve uploaded files (templates use url_for('uploads', filename=...))
     @app.route('/uploads/<path:filename>')
     def uploads(filename):
+        # Serve files from UPLOAD_FOLDER if exists, else 404
         folder = app.config.get('UPLOAD_STATIC')
         if folder and os.path.exists(os.path.join(folder, filename)):
             return send_from_directory(folder, filename)
+        # Not found (on Vercel might be ephemeral), return 404
         return "", 404
 
     # ------------------------- Public routes -------------------------
     @app.route('/')
     def home():
         products = get_all_products() or []
+        # Defensive: ensure list
         if not isinstance(products, list):
             products = []
         special = get_site_content('special_offer')
-        return render_template('home.html', products=products[:4], special=special or '')
+        return render_template('home.html', products=products[:6], special=special or '')
 
     @app.route('/about')
     def about():
@@ -120,6 +121,7 @@ def create_app():
                     recipients=[app.config.get('MAIL_DEFAULT_SENDER')],
                     reply_to=email
                 )
+                bg_url = url_for('static', filename='images/cg.gif', _external=True)
                 message.html = f"<p><b>{name}</b> ({email}) wrote:</p><p>{msg}</p>"
                 message.body = f"From: {name} <{email}>\n\n{msg}"
                 mail.send(message)
@@ -169,17 +171,18 @@ def create_app():
                 price = 0.0
 
             img = request.files.get('image')
-            stored_image_value = None
+            filename = None
             if img and allowed_file(img.filename):
                 fname = secure_filename(img.filename)
-                # choose a unique path in bucket (optional): prefix with products + timestamp or uuid
                 filename = f"prod_{fname}"
-                from supabase_db import upload_to_supabase_storage
-                public_url = upload_to_supabase_storage(img, filename)
-            else:
-                public_url=None
-            # Insert product row (image is URL or filename)
-            ok = add_product(name, desc, price, public_url)
+                path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                try:
+                    img.save(path)  # may fail on ephemeral/readonly FS
+                except Exception as e:
+                    print("⚠️ Could not save uploaded file:", e)
+                    # we continue — filename remains set (so DB will have name) but file may not actually exist on Vercel.
+                    # If you want to reliably serve images in production, use Supabase Storage or S3.
+            ok = add_product(name, desc, price, filename)
             if not ok:
                 flash('Could not add product to database — check logs.', 'warning')
             else:
@@ -207,16 +210,17 @@ def create_app():
             content = request.form.get('content')
 
             img = request.files.get('image')
-            stored_image_value = None
+            filename = None
             if img and allowed_file(img.filename):
                 fname = secure_filename(img.filename)
                 filename = f"blog_{fname}"
-                from supabase_db import upload_to_supabase_storage
-                public_url = upload_to_supabase_storage(img, filename)
-            else:
-                public_url = None
+                path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                try:
+                    img.save(path)
+                except Exception as e:
+                    print("⚠️ Could not save uploaded blog image:", e)
 
-            ok = add_blog(title, excerpt, content, public_url)
+            ok = add_blog(title, excerpt, content, filename)
             if not ok:
                 flash('Could not add blog — check logs.', 'warning')
             else:

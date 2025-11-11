@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-# Your Supabase project settings
+# Your Supabase project settings (you already provided these in your repo)
 SUPABASE_URL = "https://cvnuwppsgrhzvmlfxxzb.supabase.co"
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2bnV3cHBzZ3JoenZtbGZ4eHpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI3Nzg3NjEsImV4cCI6MjA3ODM1NDc2MX0.7IhHKZdeIOLUScF4ui2xhSSxlok1FZVdQoUOtXAcaZA"
 
@@ -13,10 +13,6 @@ HEADERS = {
 }
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-
-# bucket name you created in Supabase storage:
-SUPABASE_BUCKET = os.environ.get('SUPABASE_BUCKET', 'uploads')
-SUPABASE_STORAGE_URL = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}"
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'replace-this-secret')
@@ -31,7 +27,7 @@ class Config:
 
     ADMIN_PASSWORD_HASH = os.environ.get(
         'ADMIN_PASSWORD_HASH',
-        'scrypt:32768:8:1$5krR6wNY2z4Zr9Ob$a999462018940f5e9650327299cca44d997aa1deed71d19ea8a69b42133a9c8a62c2e09cb7c6d3c9d36bb3119d16176e8a04f4e5f1ada938f5ddfd8b5d0adb22'
+        'scrypt:32768:8:1$5krR6wNY2z4Zr9Ob$a9994620189405e9650327299cca44d997aa1deed71d19ea8a69b42133a9c8a62c2e09cb7c6d3c9d36bb3119d16176e8a04f4e5f1ada938f5ddfd8b5d0adb22'
     )
 
     PERMANENT_SESSION_LIFETIME = 1800

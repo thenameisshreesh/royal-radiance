@@ -16,6 +16,17 @@
   {% block head %}{% endblock %}
 
   <style>
+  
+   @font-face {
+    font-family: 'C_Gothic';
+    src: url("{{ url_for('static', filename='fonts/C_Gothic.ttf') }}") format('truetype');
+  }
+
+  .site-footer {
+    font-family: 'C_Gothic', sans-serif;
+  }
+
+
     /* ===== CUSTOM FONT ===== */
     @font-face {
       font-family: 'Cabin';

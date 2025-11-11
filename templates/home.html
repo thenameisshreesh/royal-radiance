@@ -3,6 +3,21 @@
 
 {% block head %}
 <style>
+
+
+
+@font-face {
+    font-family: 'C_Gothic';
+    src: url("{{ url_for('static', filename='fonts/C_Gothic.ttf') }}") format('truetype');
+  }
+
+  /* Apply to all hero titles, cards, and special offer text */
+  .hero-title,
+  .card,
+  .special-offer,
+  .btn {
+    font-family: 'C_Gothic', sans-serif;
+  }
 /* ===== Theme: Black → White Transition ===== */
 body {
   background: #000; /* dark background to match flame */

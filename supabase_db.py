@@ -1,22 +1,19 @@
 import requests
 import json
-from config import SUPABASE_URL, SUPABASE_KEY, HEADERS, SUPABASE_STORAGE_URL, SUPABASE_BUCKET
-import os
+from config import SUPABASE_URL, HEADERS
 
 # ---------- PRODUCTS ----------
 def get_all_products():
     try:
         r = requests.get(f"{SUPABASE_URL}/rest/v1/products?select=*", headers=HEADERS, timeout=10)
+        # debug
+        # print("GET products:", r.status_code, r.text)
         return r.json() if r.status_code in (200, 206) else []
     except Exception as e:
         print("❌ Error fetching products:", e)
         return []
 
 def add_product(name, short_desc, price, image):
-    """
-    image is expected to be a full URL (public URL) or filename (legacy).
-    We just store whatever is provided.
-    """
     data = {"name": name, "short_desc": short_desc, "price": price, "image": image}
     try:
         r = requests.post(f"{SUPABASE_URL}/rest/v1/products", headers=HEADERS, data=json.dumps(data), timeout=10)
@@ -74,6 +71,7 @@ def get_site_content(key):
         return None
 
 def add_site_content(key, value):
+    """Insert row if missing (used during app init)."""
     data = {"key": key, "value": value}
     try:
         r = requests.post(f"{SUPABASE_URL}/rest/v1/site_content", headers=HEADERS, data=json.dumps(data), timeout=10)
@@ -88,36 +86,8 @@ def update_site_content(key, value):
     try:
         r = requests.patch(f"{SUPABASE_URL}/rest/v1/site_content?key=eq.{key}", headers=HEADERS, data=json.dumps(data), timeout=10)
         print("🔹 update_site_content ->", r.status_code, r.text)
+        # supabase returns 204 on success for patch
         return r.status_code in (204, 200)
     except Exception as e:
         print("❌ Error in update_site_content:", e)
         return False
-
-# ---------- SUPABASE STORAGE HELPERS ----------
-def upload_to_supabase_storage(file_obj, filename):
-    """Upload file to Supabase Storage bucket and return public URL."""
-    try:
-        # Upload via Supabase Storage REST API
-        url = f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET}/{filename}"
-        headers = {
-            "Authorization": f"Bearer {SUPABASE_KEY}",
-            "apikey": SUPABASE_KEY,
-            "Content-Type": file_obj.mimetype
-        }
-        res = requests.post(url, headers=headers, data=file_obj.read())
-        if res.status_code in (200, 201):
-            return f"{SUPABASE_STORAGE_URL}/{filename}"
-        else:
-            print("⚠️ upload_to_supabase_storage failed:", res.status_code, res.text)
-            return None
-    except Exception as e:
-        print("❌ Error uploading to Supabase Storage:", e)
-        return None
-
-def public_url_for(path_in_bucket: str) -> str:
-    """
-    Return public URL for an object in the bucket.
-    Example: if bucket='uploads' and path_in_bucket='prod_img.jpg',
-    public URL = {SUPABASE_URL}/storage/v1/object/public/uploads/prod_img.jpg
-    """
-    return f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/{path_in_bucket}"
