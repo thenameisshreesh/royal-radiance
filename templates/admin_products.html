@@ -18,7 +18,7 @@
     {% for p in products %}
       <div class="card">
        <img src="{{ url_for('static', filename='uploads/' + p.image) }}" alt="{{ p.name }}">
-<div class="card-body">
+        <div class="card-body">
           <h4>{{ p.name }} — ${{ "%.2f"|format(p.price) }}</h4>
           <form method="post" action="{{ url_for('admin_products_delete', pid=p.id) }}" onsubmit="return confirm('Delete?');">
             <button class="btn small danger">Delete</button>

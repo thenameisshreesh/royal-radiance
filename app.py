@@ -73,7 +73,7 @@ def create_app():
         if not isinstance(products, list):
             products = []
         special = get_site_content('special_offer')
-        return render_template('home.html', products=products[:6], special=special or '')
+        return render_template('home.html', products=products[:4], special=special or '')
 
     @app.route('/about')
     def about():
