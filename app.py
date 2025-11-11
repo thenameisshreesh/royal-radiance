@@ -174,25 +174,13 @@ def create_app():
             if img and allowed_file(img.filename):
                 fname = secure_filename(img.filename)
                 # choose a unique path in bucket (optional): prefix with products + timestamp or uuid
-                dest_name = f"prod_{fname}"
-                try:
-                    content_type = mimetypes.guess_type(fname)[0] or 'application/octet-stream'
-                    # read bytes from stream
-                    file_bytes = img.read()
-                    ok = upload_bytes_to_supabase(file_bytes, dest_name, content_type=content_type)
-                    if ok:
-                        # build public url and store that in DB
-                        stored_image_value = public_url_for(dest_name)
-                        flash('Image uploaded to Supabase storage.', 'info')
-                    else:
-                        flash('Could not upload image to Supabase storage — saved name only.', 'warning')
-                        # fallback: store just filename (legacy)
-                        stored_image_value = dest_name
-                except Exception as e:
-                    print("⚠️ Error uploading to Supabase:", e)
-                    stored_image_value = dest_name
+                filename = f"prod_{fname}"
+                from supabase_db import upload_to_supabase_storage
+                public_url = upload_to_supabase_storage(img, filename)
+            else:
+                public_url=None
             # Insert product row (image is URL or filename)
-            ok = add_product(name, desc, price, stored_image_value)
+            ok = add_product(name, desc, price, public_url)
             if not ok:
                 flash('Could not add product to database — check logs.', 'warning')
             else:
@@ -223,21 +211,13 @@ def create_app():
             stored_image_value = None
             if img and allowed_file(img.filename):
                 fname = secure_filename(img.filename)
-                dest_name = f"blog_{fname}"
-                try:
-                    content_type = mimetypes.guess_type(fname)[0] or 'application/octet-stream'
-                    file_bytes = img.read()
-                    ok = upload_bytes_to_supabase(file_bytes, dest_name, content_type=content_type)
-                    if ok:
-                        stored_image_value = public_url_for(dest_name)
-                        flash('Blog image uploaded to Supabase storage.', 'info')
-                    else:
-                        stored_image_value = dest_name
-                except Exception as e:
-                    print("⚠️ Error uploading blog image to Supabase:", e)
-                    stored_image_value = dest_name
+                filename = f"blog_{fname}"
+                from supabase_db import upload_to_supabase_storage
+                public_url = upload_to_supabase_storage(img, filename)
+            else:
+                public_url = None
 
-            ok = add_blog(title, excerpt, content, stored_image_value)
+            ok = add_blog(title, excerpt, content, public_url)
             if not ok:
                 flash('Could not add blog — check logs.', 'warning')
             else:

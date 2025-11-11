@@ -16,6 +16,7 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 # bucket name you created in Supabase storage:
 SUPABASE_BUCKET = os.environ.get('SUPABASE_BUCKET', 'uploads')
+SUPABASE_STORAGE_URL = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}"
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'replace-this-secret')

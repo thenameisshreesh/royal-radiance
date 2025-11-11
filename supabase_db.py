@@ -1,7 +1,7 @@
 import requests
 import json
+from config import SUPABASE_URL, SUPABASE_KEY, HEADERS, SUPABASE_STORAGE_URL, SUPABASE_BUCKET
 import os
-from config import SUPABASE_URL, HEADERS, SUPABASE_BUCKET
 
 # ---------- PRODUCTS ----------
 def get_all_products():
@@ -94,26 +94,25 @@ def update_site_content(key, value):
         return False
 
 # ---------- SUPABASE STORAGE HELPERS ----------
-def upload_bytes_to_supabase(file_bytes: bytes, dest_path: str, content_type: str = "application/octet-stream"):
-    """
-    Upload raw bytes to SUPABASE storage bucket at path dest_path (e.g. "prod_img.jpg").
-    Returns True on success.
-    """
+def upload_to_supabase_storage(file_obj, filename):
+    """Upload file to Supabase Storage bucket and return public URL."""
     try:
-        url = f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET}/{dest_path}"
+        # Upload via Supabase Storage REST API
+        url = f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET}/{filename}"
         headers = {
-            "apikey": HEADERS["apikey"],
-            "Authorization": HEADERS["Authorization"],
-            # Content-Type per file
-            "Content-Type": content_type
+            "Authorization": f"Bearer {SUPABASE_KEY}",
+            "apikey": SUPABASE_KEY,
+            "Content-Type": file_obj.mimetype
         }
-        # Use PUT to upload the file bytes
-        r = requests.put(url, headers=headers, data=file_bytes, timeout=30)
-        print("🔹 storage upload ->", r.status_code, r.text)
-        return r.status_code in (200, 201, 204)
+        res = requests.post(url, headers=headers, data=file_obj.read())
+        if res.status_code in (200, 201):
+            return f"{SUPABASE_STORAGE_URL}/{filename}"
+        else:
+            print("⚠️ upload_to_supabase_storage failed:", res.status_code, res.text)
+            return None
     except Exception as e:
-        print("❌ Error uploading to Supabase storage:", e)
-        return False
+        print("❌ Error uploading to Supabase Storage:", e)
+        return None
 
 def public_url_for(path_in_bucket: str) -> str:
     """
