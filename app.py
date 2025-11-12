@@ -4,11 +4,15 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import check_password_hash
 from PIL import Image
 from config import Config
+
 from supabase_db import (
     get_all_products, add_product, delete_product,
     get_all_blogs, add_blog, delete_blog,
-    get_site_content, update_site_content, add_site_content
+    get_site_content, update_site_content, add_site_content,
+    upload_to_supabase_storage  # ✅ new
 )
+
+
 from flask_mail import Mail, Message
 from datetime import timedelta
 from functools import wraps
@@ -165,31 +169,69 @@ def create_app():
         if request.method == 'POST':
             name = request.form.get('name')
             desc = request.form.get('short_desc')
+
             try:
                 price = float(request.form.get('price') or 0)
             except:
                 price = 0.0
 
             img = request.files.get('image')
-            filename = None
+            image_url = None
+
             if img and allowed_file(img.filename):
                 fname = secure_filename(img.filename)
                 filename = f"prod_{fname}"
-                path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                try:
-                    img.save(path)  # may fail on ephemeral/readonly FS
-                except Exception as e:
-                    print("⚠️ Could not save uploaded file:", e)
-                    # we continue — filename remains set (so DB will have name) but file may not actually exist on Vercel.
-                    # If you want to reliably serve images in production, use Supabase Storage or S3.
-            ok = add_product(name, desc, price, filename)
+                file_bytes = img.read()
+            # ✅ Upload to Supabase Storage
+                image_url = upload_to_supabase_storage(filename, file_bytes, img.content_type)
+
+            ok = add_product(name, desc, price, image_url)
             if not ok:
-                flash('Could not add product to database — check logs.', 'warning')
+                flash('⚠️ Could not add product to database — check logs.', 'warning')
             else:
-                flash('Product added!', 'success')
+                flash('✅ Product added successfully!', 'success')
             return redirect(url_for('admin_products'))
+
+    # Fetch all products
         products = get_all_products() or []
         return render_template('admin_products.html', products=products)
+
+
+    @app.route('/admin/blogs', methods=['GET', 'POST'])
+    @admin_required
+    def admin_blogs():
+        if request.method == 'POST':
+            title = request.form.get('title')
+            excerpt = request.form.get('excerpt')
+            content = request.form.get('content')
+
+            img = request.files.get('image')
+            image_url = None
+
+            if img and allowed_file(img.filename):
+                fname = secure_filename(img.filename)
+                filename = f"blog_{fname}"
+                file_bytes = img.read()
+            # ✅ Upload to Supabase Storage
+                image_url = upload_to_supabase_storage(filename, file_bytes, img.content_type)
+
+            ok = add_blog(title, excerpt, content, image_url)
+            if not ok:
+                flash('⚠️ Could not add blog — check logs.', 'warning')
+            else:
+                flash('✅ Blog added successfully!', 'success')
+            return redirect(url_for('admin_blogs'))
+
+    # Fetch all blog posts
+        posts = get_all_blogs() or []
+        return render_template('admin_blogs.html', posts=posts)
+
+
+
+
+
+
+
 
     @app.route('/admin/products/delete/<int:pid>', methods=['POST'])
     @admin_required
@@ -201,34 +243,7 @@ def create_app():
             flash('Product deleted.', 'info')
         return redirect(url_for('admin_products'))
 
-    @app.route('/admin/blogs', methods=['GET', 'POST'])
-    @admin_required
-    def admin_blogs():
-        if request.method == 'POST':
-            title = request.form.get('title')
-            excerpt = request.form.get('excerpt')
-            content = request.form.get('content')
-
-            img = request.files.get('image')
-            filename = None
-            if img and allowed_file(img.filename):
-                fname = secure_filename(img.filename)
-                filename = f"blog_{fname}"
-                path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                try:
-                    img.save(path)
-                except Exception as e:
-                    print("⚠️ Could not save uploaded blog image:", e)
-
-            ok = add_blog(title, excerpt, content, filename)
-            if not ok:
-                flash('Could not add blog — check logs.', 'warning')
-            else:
-                flash('Blog added!', 'success')
-            return redirect(url_for('admin_blogs'))
-        posts = get_all_blogs() or []
-        return render_template('admin_blogs.html', posts=posts)
-
+    
     @app.route('/admin/blogs/delete/<int:bid>', methods=['POST'])
     @admin_required
     def admin_blogs_delete(bid):
