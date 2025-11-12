@@ -19,7 +19,6 @@ h3,
   font-family: 'C_Gothic', sans-serif;
 }
 
-
 body, html {
   margin: 0;
   padding: 0;
@@ -83,17 +82,15 @@ body, html {
   }
 }
 
-
 /* Ensure footer appears above video background */
 .site-footer {
   position: relative;
   z-index: 5;
-  background-color: #000; /* solid black to match header */
+  background-color: #000;
   width: 100%;
   margin: 0;
   padding: 40px 0;
 }
-
 
 </style>
 
@@ -108,14 +105,14 @@ body, html {
     {% for post in posts %}
       <article class="card blog-card">
         <a href="{{ url_for('blog_post', bid=post.id) }}">
-          {% if p.image %}
-           <img src="{{ p.image }}" alt="{{ p.title }}">
+          {% if post.image %}
+            <img src="{{ post.image }}" alt="{{ post.title }}">
           {% else %}
             <img src="{{ url_for('static', filename='images/sample_blog.jpg') }}" alt="blog">
           {% endif %}
           <div class="card-body">
-            <h3>{{ p.title }}</h3>
-            <p class="excerpt">{{ p.excerpt }}</p>
+            <h3>{{ post.title }}</h3>
+            <p class="excerpt">{{ post.excerpt }}</p>
             <span class="read-more">Read More →</span>
           </div>
         </a>
