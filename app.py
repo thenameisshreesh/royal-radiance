@@ -227,7 +227,7 @@ def create_app():
 
     # Fetch all blog posts
         posts = get_all_blogs() or []
-        return render_template('admin_blogs.html', posts=posts)
+        return render_template('blog.html', posts=posts)
 
 
 

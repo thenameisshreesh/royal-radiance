@@ -108,14 +108,14 @@ body, html {
     {% for post in posts %}
       <article class="card blog-card">
         <a href="{{ url_for('blog_post', bid=post.id) }}">
-          {% if post.image %}
-          <img src="{{ p.image }}">
+          {% if p.image %}
+           <img src="{{ p.image }}" alt="{{ p.title }}">
           {% else %}
             <img src="{{ url_for('static', filename='images/sample_blog.jpg') }}" alt="blog">
           {% endif %}
           <div class="card-body">
-            <h3>{{ post.title }}</h3>
-            <p class="excerpt">{{ post.excerpt }}</p>
+            <h3>{{ p.title }}</h3>
+            <p class="excerpt">{{ p.excerpt }}</p>
             <span class="read-more">Read More →</span>
           </div>
         </a>
