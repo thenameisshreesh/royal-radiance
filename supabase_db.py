@@ -86,3 +86,36 @@ def delete_blog(bid):
     except Exception as e:
         print("❌ Error deleting blog:", e)
         return False
+
+def get_site_content(key):
+    try:
+        r = requests.get(f"{SUPABASE_URL}/rest/v1/site_content?key=eq.{key}&select=value", headers=HEADERS, timeout=10)
+        data = r.json()
+        return data[0]['value'] if data else None
+    except Exception as e:
+        print("❌ Error in get_site_content:", e)
+        return None
+
+
+def add_site_content(key, value):
+    """Insert row if missing (used during app init)."""
+    data = {"key": key, "value": value}
+    try:
+        r = requests.post(f"{SUPABASE_URL}/rest/v1/site_content", headers=HEADERS, data=json.dumps(data), timeout=10)
+        print("🔹 add_site_content ->", r.status_code, r.text)
+        return r.status_code in (201, 200)
+    except Exception as e:
+        print("❌ Error in add_site_content:", e)
+        return False
+
+
+def update_site_content(key, value):
+    data = {"value": value}
+    try:
+        r = requests.patch(f"{SUPABASE_URL}/rest/v1/site_content?key=eq.{key}", headers=HEADERS, data=json.dumps(data), timeout=10)
+        print("🔹 update_site_content ->", r.status_code, r.text)
+        # supabase returns 204 on success for patch
+        return r.status_code in (204, 200)
+    except Exception as e:
+        print("❌ Error in update_site_content:", e)
+        return False
