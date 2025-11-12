@@ -194,6 +194,9 @@ def create_app():
 
     # Fetch all products
         products = get_all_products() or []
+        for p in products:
+            if not p.get('image'):
+                p['image'] = url_for('static', filename='images/no_image.png')
         return render_template('admin_products.html', products=products)
 
 
