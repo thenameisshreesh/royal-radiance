@@ -80,9 +80,16 @@ body, html {
 <section class="wrap about">
   <h2>About Royal Radiance</h2>
   <div class="about-body">
+    
     <div class="about-text">
-    {{ about_text.replace('\n', '<br>') | safe }}
-</div>
+      {{ about_text
+          .replace('\n\n', '</p><p>')
+          .replace('\n', '<br>')
+          | safe
+      }}
+    </div>
+
+
   </div>
 </section>
 {% endblock %}
