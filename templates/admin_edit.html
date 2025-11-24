@@ -4,7 +4,7 @@
 <section class="wrap admin-edit">
   <h2>📝 Edit "{{ item.key }}"</h2>
   <form method="post" class="edit-form">
-    <textarea name="value" rows="10">{{ item.value }}</textarea>
+    <textarea name="value" rows="10">{{ item.value | safe }}</textarea>
     <div><button class="btn glow" type="submit">Save</button></div>
   </form>
 </section>
