@@ -261,15 +261,20 @@ def create_app():
     @admin_required
     def admin_edit(key):
         if request.method == 'POST':
-            val = request.form.get('value')
+            val = request.form.get('value', '')
+
             ok = update_site_content(key, val)
             if not ok:
                 flash('Could not update content — check logs.', 'warning')
             else:
                 flash('Updated successfully.', 'success')
+
             return redirect(url_for('admin_dashboard'))
+
+    # GET existing value exactly as stored
         val = get_site_content(key) or ''
         return render_template('admin_edit.html', item={'key': key, 'value': val})
+
 
     @app.errorhandler(404)
     def not_found(e):
